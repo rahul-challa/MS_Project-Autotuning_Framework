@@ -1,0 +1,315 @@
+======================================================================
+Iterative Refinement Autotuning Framework - 4 Phase Approach
+======================================================================
+Target: 80%+ accuracy (13/16 parameters)
+
+Phase 1: Broad Exploration - Coarse search to identify promising regions
+Phase 2: Focused Refinement - Fine-tune each parameter in promising range
+Phase 3: Joint Optimization - Optimize parameter pairs that interact
+Phase 4: Final Validation - Fine-tune all parameters together
+
+Predicting CPU parameters using ONLY performance metrics
+(Actual parameters used only for validation at the end)
+
+Loaded ground truth for 30 workloads
+======================================================================
+ITERATIVE REFINEMENT AUTOTUNING - 4 PHASE APPROACH
+======================================================================
+Target: 80%+ accuracy (13/16 parameters)
+
+======================================================================
+PHASE 1: BROAD EXPLORATION
+======================================================================
+Iterations: 1000
+Goal: Identify promising regions for all parameters
+
+  Iteration 1: NEW BEST - Error: 1.897905
+  Iteration 2: NEW BEST - Error: 1.713011
+  Iteration 9: NEW BEST - Error: 1.675383
+  Iteration 183: NEW BEST - Error: 1.672071
+  Iteration 238: NEW BEST - Error: 1.671016
+  Iteration 451: NEW BEST - Error: 1.670874
+  Iteration 493: NEW BEST - Error: 1.670656
+
+Phase 1 Complete!
+Best error: 1.670656
+Best config: {'rob_size': 160, 'l1_cache_size': 64, 'l2_cache_size': 320, 'issue_width': 3, 'l1_latency': 4, 'l2_latency': 12, 'l3_cache_size': 3072, 'l3_latency': 35, 'memory_latency': 250, 'memory_bandwidth': 30, 'branch_predictor_size': 1024, 'tlb_size': 512, 'execution_units': 8, 'simd_width': 256, 'prefetcher_lines': 16, 'smt_threads': 1}
+
+======================================================================
+PHASE 2: FOCUSED REFINEMENT
+======================================================================
+Iterations per parameter: 5000
+Goal: Fine-tune each parameter in promising range
+
+rob_size: Promising range [128, 160, 192] (from 7 total values)
+l1_cache_size: Promising range [48, 64, 80] (from 7 total values)
+l2_cache_size: Promising range [256, 320, 384] (from 7 total values)
+issue_width: Promising range [2, 3, 4] (from 7 total values)
+l1_latency: Promising range [3, 4] (from 3 total values)
+l2_latency: Promising range [11, 12, 13] (from 7 total values)
+l3_cache_size: Promising range [2048, 3072, 4096] (from 7 total values)
+l3_latency: Promising range [30, 35, 40] (from 7 total values)
+memory_latency: Promising range [200, 250, 300] (from 7 total values)
+memory_bandwidth: Promising range [25, 30, 35] (from 7 total values)
+branch_predictor_size: Promising range [512, 1024, 2048] (from 7 total values)
+tlb_size: Promising range [256, 512, 1024] (from 7 total values)
+execution_units: Promising range [7, 8] (from 7 total values)
+simd_width: Promising range [128, 256, 512] (from 3 total values)
+prefetcher_lines: Promising range [12, 16, 20] (from 7 total values)
+smt_threads: Promising range [1, 2] (from 4 total values)
+
+======================================================================
+REFINING PARAMETER 1/16: rob_size
+======================================================================
+  Iteration 1: NEW BEST for rob_size
+    Value: 128, Error: 1.811346
+  Iteration 2: NEW BEST for rob_size
+    Value: 160, Error: 1.670656
+
+Best value for rob_size: 160 (error: 1.670656)
+
+======================================================================
+REFINING PARAMETER 2/16: l1_cache_size
+======================================================================
+  Iteration 1: NEW BEST for l1_cache_size
+    Value: 48, Error: 1.827257
+  Iteration 2: NEW BEST for l1_cache_size
+    Value: 64, Error: 1.670656
+
+Best value for l1_cache_size: 64 (error: 1.670656)
+
+======================================================================
+REFINING PARAMETER 3/16: l2_cache_size
+======================================================================
+  Iteration 1: NEW BEST for l2_cache_size
+    Value: 256, Error: 1.763154
+  Iteration 2: NEW BEST for l2_cache_size
+    Value: 320, Error: 1.670656
+
+Best value for l2_cache_size: 320 (error: 1.670656)
+
+======================================================================
+REFINING PARAMETER 4/16: issue_width
+======================================================================
+  Iteration 1: NEW BEST for issue_width
+    Value: 2, Error: 2.018793
+  Iteration 2: NEW BEST for issue_width
+    Value: 3, Error: 1.670656
+
+Best value for issue_width: 3 (error: 1.670656)
+
+======================================================================
+REFINING PARAMETER 5/16: l1_latency
+======================================================================
+  Iteration 1: NEW BEST for l1_latency
+    Value: 3, Error: 1.914907
+  Iteration 2: NEW BEST for l1_latency
+    Value: 4, Error: 1.670656
+
+Best value for l1_latency: 4 (error: 1.670656)
+
+======================================================================
+REFINING PARAMETER 6/16: l2_latency
+======================================================================
+  Iteration 1: NEW BEST for l2_latency
+    Value: 11, Error: 1.703031
+  Iteration 2: NEW BEST for l2_latency
+    Value: 12, Error: 1.670656
+
+Best value for l2_latency: 12 (error: 1.670656)
+
+======================================================================
+REFINING PARAMETER 7/16: l3_cache_size
+======================================================================
+  Iteration 1: NEW BEST for l3_cache_size
+    Value: 2048, Error: 2.160471
+  Iteration 2: NEW BEST for l3_cache_size
+    Value: 3072, Error: 1.670656
+
+Best value for l3_cache_size: 3072 (error: 1.670656)
+
+======================================================================
+REFINING PARAMETER 8/16: l3_latency
+======================================================================
+  Iteration 1: NEW BEST for l3_latency
+    Value: 30, Error: 1.714096
+  Iteration 2: NEW BEST for l3_latency
+    Value: 35, Error: 1.670656
+
+Best value for l3_latency: 35 (error: 1.670656)
+
+======================================================================
+REFINING PARAMETER 9/16: memory_latency
+======================================================================
+  Iteration 1: NEW BEST for memory_latency
+    Value: 200, Error: 1.844369
+  Iteration 2: NEW BEST for memory_latency
+    Value: 250, Error: 1.670656
+
+Best value for memory_latency: 250 (error: 1.670656)
+
+======================================================================
+REFINING PARAMETER 10/16: memory_bandwidth
+======================================================================
+  Iteration 1: NEW BEST for memory_bandwidth
+    Value: 25, Error: 1.709150
+  Iteration 2: NEW BEST for memory_bandwidth
+    Value: 30, Error: 1.670656
+
+Best value for memory_bandwidth: 30 (error: 1.670656)
+
+======================================================================
+REFINING PARAMETER 11/16: branch_predictor_size
+======================================================================
+  Iteration 1: NEW BEST for branch_predictor_size
+    Value: 512, Error: 1.679242
+  Iteration 2: NEW BEST for branch_predictor_size
+    Value: 1024, Error: 1.670656
+
+Best value for branch_predictor_size: 1024 (error: 1.670656)
+
+======================================================================
+REFINING PARAMETER 12/16: tlb_size
+======================================================================
+  Iteration 1: NEW BEST for tlb_size
+    Value: 256, Error: 2.136677
+  Iteration 2: NEW BEST for tlb_size
+    Value: 512, Error: 1.670656
+
+Best value for tlb_size: 512 (error: 1.670656)
+
+======================================================================
+REFINING PARAMETER 13/16: execution_units
+======================================================================
+  Iteration 1: NEW BEST for execution_units
+    Value: 7, Error: 1.679647
+  Iteration 2: NEW BEST for execution_units
+    Value: 8, Error: 1.670656
+
+Best value for execution_units: 8 (error: 1.670656)
+
+======================================================================
+REFINING PARAMETER 14/16: simd_width
+======================================================================
+  Iteration 1: NEW BEST for simd_width
+    Value: 128, Error: 1.914346
+  Iteration 2: NEW BEST for simd_width
+    Value: 256, Error: 1.670656
+
+Best value for simd_width: 256 (error: 1.670656)
+
+======================================================================
+REFINING PARAMETER 15/16: prefetcher_lines
+======================================================================
+  Iteration 1: NEW BEST for prefetcher_lines
+    Value: 12, Error: 1.754937
+  Iteration 2: NEW BEST for prefetcher_lines
+    Value: 16, Error: 1.670656
+
+Best value for prefetcher_lines: 16 (error: 1.670656)
+
+======================================================================
+REFINING PARAMETER 16/16: smt_threads
+======================================================================
+  Iteration 1: NEW BEST for smt_threads
+    Value: 1, Error: 1.670656
+
+Best value for smt_threads: 1 (error: 1.670656)
+
+Phase 2 Complete!
+Best error: 1.670656
+
+======================================================================
+PHASE 3: JOINT OPTIMIZATION
+======================================================================
+Iterations: 10000
+Goal: Optimize parameter pairs that interact strongly
+
+======================================================================
+JOINT OPTIMIZATION 1/7: rob_size & issue_width
+======================================================================
+Best rob_size: 160, Best issue_width: 3
+Error: 1.670656
+
+======================================================================
+JOINT OPTIMIZATION 2/7: l1_cache_size & l1_latency
+======================================================================
+Best l1_cache_size: 64, Best l1_latency: 4
+Error: 1.670656
+
+======================================================================
+JOINT OPTIMIZATION 3/7: l2_cache_size & l2_latency
+======================================================================
+Best l2_cache_size: 320, Best l2_latency: 12
+Error: 1.670656
+
+======================================================================
+JOINT OPTIMIZATION 4/7: l3_cache_size & l3_latency
+======================================================================
+Best l3_cache_size: 3072, Best l3_latency: 35
+Error: 1.670656
+
+======================================================================
+JOINT OPTIMIZATION 5/7: memory_latency & memory_bandwidth
+======================================================================
+Best memory_latency: 250, Best memory_bandwidth: 30
+Error: 1.670656
+
+======================================================================
+JOINT OPTIMIZATION 6/7: branch_predictor_size & execution_units
+======================================================================
+Best branch_predictor_size: 1024, Best execution_units: 8
+Error: 1.670656
+
+======================================================================
+JOINT OPTIMIZATION 7/7: tlb_size & prefetcher_lines
+======================================================================
+Best tlb_size: 512, Best prefetcher_lines: 16
+Error: 1.670656
+
+Phase 3 Complete!
+Best error: 1.670656
+
+======================================================================
+PHASE 4: FINAL VALIDATION
+======================================================================
+Iterations: 5000
+Goal: Fine-tune all parameters together
+
+Phase 4 Complete!
+Final best error: 1.666674
+
+======================================================================
+VALIDATION: Comparing predicted vs actual parameters
+======================================================================
+Warning: Could not extract Windows CPU params: [WinError 2] The system cannot find the file specified
+Actual CPU parameters: {'rob_size': 128, 'l1_cache_size': 64, 'l2_cache_size': 256, 'issue_width': 4, 'l1_latency': 3, 'l2_latency': 12, 'l3_cache_size': 2048, 'l3_latency': 40, 'memory_latency': 200, 'memory_bandwidth': 25, 'branch_predictor_size': 4096, 'tlb_size': 512, 'execution_units': 4, 'simd_width': 256, 'prefetcher_lines': 16, 'smt_threads': 2}
+
+Final predicted parameters: {'rob_size': 128, 'l1_cache_size': 48, 'l2_cache_size': 320, 'issue_width': 4, 'l1_latency': 3, 'l2_latency': 12, 'l3_cache_size': 3072, 'l3_latency': 35, 'memory_latency': 250, 'memory_bandwidth': 20, 'branch_predictor_size': 512, 'tlb_size': 4096, 'execution_units': 6, 'simd_width': 256, 'prefetcher_lines': 20, 'smt_threads': 1}
+Parameter matches: 5/16 (31.2%)
+
+Parameter-by-Parameter Comparison:
+----------------------------------------------------------------------
+Parameter                 Predicted       Actual          Match     
+----------------------------------------------------------------------
+rob_size                  128             128             YES       
+l1_cache_size             48              64              NO        
+l2_cache_size             320             256             NO        
+issue_width               4               4               YES       
+l1_latency                3               3               YES       
+l2_latency                12              12              YES       
+l3_cache_size             3072            2048            NO        
+l3_latency                35              40              NO        
+memory_latency            250             200             NO        
+memory_bandwidth          20              25              NO        
+branch_predictor_size     512             4096            NO        
+tlb_size                  4096            512             NO        
+execution_units           6               4               NO        
+simd_width                256             256             YES       
+prefetcher_lines          20              16              NO        
+smt_threads               1               2               NO        
+----------------------------------------------------------------------
+Convergence plot saved: C:\Users\rahul\Desktop\CODE\MS_Project-Autotuning_Framework\data\results\iterative_refinement_autotuning_convergence.png
+
+Results saved to: C:\Users\rahul\Desktop\CODE\MS_Project-Autotuning_Framework\data\results\iterative_refinement_autotuning_results.json
+Convergence plot saved to: C:\Users\rahul\Desktop\CODE\MS_Project-Autotuning_Framework\data\results\iterative_refinement_autotuning_convergence.png

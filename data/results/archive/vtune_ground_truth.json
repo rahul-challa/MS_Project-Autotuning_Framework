@@ -1,0 +1,70 @@
+{
+  "w1_matrix_mult": {
+    "execution_time": 0.004657,
+    "elapsed_time": 0.004657,
+    "cpu_time": 0.004657,
+    "_source": "direct_timing"
+  },
+  "w2_bubble_sort": {
+    "execution_time": 7.123871,
+    "elapsed_time": 7.123871,
+    "cpu_time": 7.123871,
+    "_source": "direct_timing"
+  },
+  "w3_fft_calc": {
+    "execution_time": 0.03818,
+    "elapsed_time": 0.03818,
+    "cpu_time": 0.03818,
+    "_source": "direct_timing"
+  },
+  "w4_memory_intensive": {
+    "execution_time": 0.00939,
+    "elapsed_time": 0.00939,
+    "cpu_time": 0.00939,
+    "_source": "direct_timing"
+  },
+  "w5_compute_intensive": {
+    "execution_time": 0.021914,
+    "elapsed_time": 0.021914,
+    "cpu_time": 0.021914,
+    "_source": "direct_timing"
+  },
+  "w6_branch_intensive": {
+    "execution_time": 0.005541,
+    "elapsed_time": 0.005541,
+    "cpu_time": 0.005541,
+    "_source": "direct_timing"
+  },
+  "w7_cache_friendly": {
+    "execution_time": 0.022384,
+    "elapsed_time": 0.022384,
+    "cpu_time": 0.022384,
+    "_source": "direct_timing"
+  },
+  "w8_mixed_workload": {
+    "execution_time": 0.00773,
+    "elapsed_time": 0.00773,
+    "cpu_time": 0.00773,
+    "_source": "direct_timing"
+  },
+  "_metadata": {
+    "source": "VTune Profiler",
+    "collection_method": "all_collection_types",
+    "workloads": [
+      "w1_matrix_mult",
+      "w2_bubble_sort",
+      "w3_fft_calc",
+      "w4_memory_intensive",
+      "w5_compute_intensive",
+      "w6_branch_intensive",
+      "w7_cache_friendly",
+      "w8_mixed_workload"
+    ],
+    "metrics_collected": [
+      "_source",
+      "cpu_time",
+      "elapsed_time",
+      "execution_time"
+    ]
+  }
+}

@@ -1,0 +1,10 @@
+python : usage: main.py [-h]
+At C:\Users\rahul\AppData\Local\Temp\ps-script-2b4d179e-e982-4aa7-9eaf-18d8c896782e.ps1:7 char:67
++ ... Framework"; python main.py hybrid-aggregation-autotune --iterations-p ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (usage: main.py [-h]:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+               {autotune,sequential-autotune,mean-aggregation-autotune,collect-ground-truth} ...
+main.py: error: argument command: invalid choice: 'hybrid-aggregation-autotune' (choose from autotune, 
+sequential-autotune, mean-aggregation-autotune, collect-ground-truth)

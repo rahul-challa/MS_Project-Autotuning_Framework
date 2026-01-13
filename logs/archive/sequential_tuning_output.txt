@@ -1,0 +1,359 @@
+======================================================================
+Sequential Autotuning Framework - CPU Parameter Prediction
+======================================================================
+Tuning one parameter at a time for maximum accuracy
+Predicting CPU parameters using ONLY performance metrics
+(Actual parameters used only for validation at the end)
+
+Loaded ground truth for 15 workloads
+Using sequential parameter tuning (one parameter at a time)
+======================================================================
+
+Parameter tuning order: ['rob_size', 'l1_cache_size', 'l2_cache_size', 'issue_width', 'l1_latency', 'l2_latency', 'l3_cache_size', 'l3_latency', 'memory_latency', 'memory_bandwidth', 'branch_predictor_size', 'tlb_size', 'execution_units', 'simd_width', 'prefetcher_lines', 'smt_threads']
+Iterations per parameter: 5000
+Total iterations: 80,000
+
+Initial configuration (using middle values):
+  rob_size: 160
+  l1_cache_size: 80
+  l2_cache_size: 320
+  issue_width: 5
+  l1_latency: 3
+  l2_latency: 12
+  l3_cache_size: 3072
+  l3_latency: 45
+  memory_latency: 250
+  memory_bandwidth: 25
+  branch_predictor_size: 4096
+  tlb_size: 512
+  execution_units: 5
+  simd_width: 256
+  prefetcher_lines: 16
+  smt_threads: 4
+
+======================================================================
+TUNING PARAMETER 1/16: rob_size
+======================================================================
+Possible values: [64, 96, 128, 160, 192, 224, 256]
+Current value: 160
+Other parameters fixed at: ['l1_cache_size=80', 'l2_cache_size=320', 'issue_width=5', 'l1_latency=3', 'l2_latency=12', 'l3_cache_size=3072', 'l3_latency=45', 'memory_latency=250', 'memory_bandwidth=25', 'branch_predictor_size=4096', 'tlb_size=512', 'execution_units=5', 'simd_width=256', 'prefetcher_lines=16', 'smt_threads=4']
+
+  Iteration 1: NEW BEST for rob_size
+    Value: 64, Error: 1.762924
+  Iteration 1: NEW GLOBAL BEST
+    rob_size=64, Error: 1.762924
+  Iteration 2: NEW BEST for rob_size
+    Value: 96, Error: 1.755929
+  Iteration 2: NEW GLOBAL BEST
+    rob_size=96, Error: 1.755929
+
+Best value for rob_size: 96 (error: 1.755929)
+Updated configuration: {'rob_size': 96, 'l1_cache_size': 80, 'l2_cache_size': 320, 'issue_width': 5, 'l1_latency': 3, 'l2_latency': 12, 'l3_cache_size': 3072, 'l3_latency': 45, 'memory_latency': 250, 'memory_bandwidth': 25, 'branch_predictor_size': 4096, 'tlb_size': 512, 'execution_units': 5, 'simd_width': 256, 'prefetcher_lines': 16, 'smt_threads': 4}
+
+======================================================================
+TUNING PARAMETER 2/16: l1_cache_size
+======================================================================
+Possible values: [32, 48, 64, 80, 96, 112, 128]
+Current value: 80
+Other parameters fixed at: ['rob_size=96', 'l2_cache_size=320', 'issue_width=5', 'l1_latency=3', 'l2_latency=12', 'l3_cache_size=3072', 'l3_latency=45', 'memory_latency=250', 'memory_bandwidth=25', 'branch_predictor_size=4096', 'tlb_size=512', 'execution_units=5', 'simd_width=256', 'prefetcher_lines=16', 'smt_threads=4']
+
+  Iteration 1: NEW BEST for l1_cache_size
+    Value: 32, Error: 2.364329
+  Iteration 2: NEW BEST for l1_cache_size
+    Value: 48, Error: 1.842813
+  Iteration 3: NEW BEST for l1_cache_size
+    Value: 64, Error: 1.727156
+  Iteration 3: NEW GLOBAL BEST
+    l1_cache_size=64, Error: 1.727156
+
+Best value for l1_cache_size: 64 (error: 1.727156)
+Updated configuration: {'rob_size': 96, 'l1_cache_size': 64, 'l2_cache_size': 320, 'issue_width': 5, 'l1_latency': 3, 'l2_latency': 12, 'l3_cache_size': 3072, 'l3_latency': 45, 'memory_latency': 250, 'memory_bandwidth': 25, 'branch_predictor_size': 4096, 'tlb_size': 512, 'execution_units': 5, 'simd_width': 256, 'prefetcher_lines': 16, 'smt_threads': 4}
+
+======================================================================
+TUNING PARAMETER 3/16: l2_cache_size
+======================================================================
+Possible values: [128, 192, 256, 320, 384, 448, 512]
+Current value: 320
+Other parameters fixed at: ['rob_size=96', 'l1_cache_size=64', 'issue_width=5', 'l1_latency=3', 'l2_latency=12', 'l3_cache_size=3072', 'l3_latency=45', 'memory_latency=250', 'memory_bandwidth=25', 'branch_predictor_size=4096', 'tlb_size=512', 'execution_units=5', 'simd_width=256', 'prefetcher_lines=16', 'smt_threads=4']
+
+  Iteration 1: NEW BEST for l2_cache_size
+    Value: 128, Error: 2.723240
+  Iteration 2: NEW BEST for l2_cache_size
+    Value: 192, Error: 2.069506
+  Iteration 3: NEW BEST for l2_cache_size
+    Value: 256, Error: 1.790609
+  Iteration 4: NEW BEST for l2_cache_size
+    Value: 320, Error: 1.727156
+
+Best value for l2_cache_size: 320 (error: 1.727156)
+Updated configuration: {'rob_size': 96, 'l1_cache_size': 64, 'l2_cache_size': 320, 'issue_width': 5, 'l1_latency': 3, 'l2_latency': 12, 'l3_cache_size': 3072, 'l3_latency': 45, 'memory_latency': 250, 'memory_bandwidth': 25, 'branch_predictor_size': 4096, 'tlb_size': 512, 'execution_units': 5, 'simd_width': 256, 'prefetcher_lines': 16, 'smt_threads': 4}
+
+======================================================================
+TUNING PARAMETER 4/16: issue_width
+======================================================================
+Possible values: [2, 3, 4, 5, 6, 7, 8]
+Current value: 5
+Other parameters fixed at: ['rob_size=96', 'l1_cache_size=64', 'l2_cache_size=320', 'l1_latency=3', 'l2_latency=12', 'l3_cache_size=3072', 'l3_latency=45', 'memory_latency=250', 'memory_bandwidth=25', 'branch_predictor_size=4096', 'tlb_size=512', 'execution_units=5', 'simd_width=256', 'prefetcher_lines=16', 'smt_threads=4']
+
+  Iteration 1: NEW BEST for issue_width
+    Value: 2, Error: 3.139434
+  Iteration 2: NEW BEST for issue_width
+    Value: 3, Error: 2.385901
+  Iteration 3: NEW BEST for issue_width
+    Value: 4, Error: 1.850636
+  Iteration 4: NEW BEST for issue_width
+    Value: 5, Error: 1.727156
+
+Best value for issue_width: 5 (error: 1.727156)
+Updated configuration: {'rob_size': 96, 'l1_cache_size': 64, 'l2_cache_size': 320, 'issue_width': 5, 'l1_latency': 3, 'l2_latency': 12, 'l3_cache_size': 3072, 'l3_latency': 45, 'memory_latency': 250, 'memory_bandwidth': 25, 'branch_predictor_size': 4096, 'tlb_size': 512, 'execution_units': 5, 'simd_width': 256, 'prefetcher_lines': 16, 'smt_threads': 4}
+
+======================================================================
+TUNING PARAMETER 5/16: l1_latency
+======================================================================
+Possible values: [2, 3, 4]
+Current value: 3
+Other parameters fixed at: ['rob_size=96', 'l1_cache_size=64', 'l2_cache_size=320', 'issue_width=5', 'l2_latency=12', 'l3_cache_size=3072', 'l3_latency=45', 'memory_latency=250', 'memory_bandwidth=25', 'branch_predictor_size=4096', 'tlb_size=512', 'execution_units=5', 'simd_width=256', 'prefetcher_lines=16', 'smt_threads=4']
+
+  Iteration 1: NEW BEST for l1_latency
+    Value: 2, Error: 1.802572
+  Iteration 2: NEW BEST for l1_latency
+    Value: 3, Error: 1.727156
+
+Best value for l1_latency: 3 (error: 1.727156)
+Updated configuration: {'rob_size': 96, 'l1_cache_size': 64, 'l2_cache_size': 320, 'issue_width': 5, 'l1_latency': 3, 'l2_latency': 12, 'l3_cache_size': 3072, 'l3_latency': 45, 'memory_latency': 250, 'memory_bandwidth': 25, 'branch_predictor_size': 4096, 'tlb_size': 512, 'execution_units': 5, 'simd_width': 256, 'prefetcher_lines': 16, 'smt_threads': 4}
+
+======================================================================
+TUNING PARAMETER 6/16: l2_latency
+======================================================================
+Possible values: [8, 10, 11, 12, 13, 14, 16]
+Current value: 12
+Other parameters fixed at: ['rob_size=96', 'l1_cache_size=64', 'l2_cache_size=320', 'issue_width=5', 'l1_latency=3', 'l3_cache_size=3072', 'l3_latency=45', 'memory_latency=250', 'memory_bandwidth=25', 'branch_predictor_size=4096', 'tlb_size=512', 'execution_units=5', 'simd_width=256', 'prefetcher_lines=16', 'smt_threads=4']
+
+  Iteration 1: NEW BEST for l2_latency
+    Value: 8, Error: 1.859300
+  Iteration 2: NEW BEST for l2_latency
+    Value: 10, Error: 1.744579
+  Iteration 3: NEW BEST for l2_latency
+    Value: 11, Error: 1.723135
+  Iteration 3: NEW GLOBAL BEST
+    l2_latency=11, Error: 1.723135
+
+Best value for l2_latency: 11 (error: 1.723135)
+Updated configuration: {'rob_size': 96, 'l1_cache_size': 64, 'l2_cache_size': 320, 'issue_width': 5, 'l1_latency': 3, 'l2_latency': 11, 'l3_cache_size': 3072, 'l3_latency': 45, 'memory_latency': 250, 'memory_bandwidth': 25, 'branch_predictor_size': 4096, 'tlb_size': 512, 'execution_units': 5, 'simd_width': 256, 'prefetcher_lines': 16, 'smt_threads': 4}
+
+======================================================================
+TUNING PARAMETER 7/16: l3_cache_size
+======================================================================
+Possible values: [1024, 1536, 2048, 3072, 4096, 6144, 8192]
+Current value: 3072
+Other parameters fixed at: ['rob_size=96', 'l1_cache_size=64', 'l2_cache_size=320', 'issue_width=5', 'l1_latency=3', 'l2_latency=11', 'l3_latency=45', 'memory_latency=250', 'memory_bandwidth=25', 'branch_predictor_size=4096', 'tlb_size=512', 'execution_units=5', 'simd_width=256', 'prefetcher_lines=16', 'smt_threads=4']
+
+  Iteration 1: NEW BEST for l3_cache_size
+    Value: 1024, Error: 2.144502
+  Iteration 2: NEW BEST for l3_cache_size
+    Value: 1536, Error: 1.855408
+  Iteration 3: NEW BEST for l3_cache_size
+    Value: 2048, Error: 1.738197
+  Iteration 4: NEW BEST for l3_cache_size
+    Value: 3072, Error: 1.723135
+
+Best value for l3_cache_size: 3072 (error: 1.723135)
+Updated configuration: {'rob_size': 96, 'l1_cache_size': 64, 'l2_cache_size': 320, 'issue_width': 5, 'l1_latency': 3, 'l2_latency': 11, 'l3_cache_size': 3072, 'l3_latency': 45, 'memory_latency': 250, 'memory_bandwidth': 25, 'branch_predictor_size': 4096, 'tlb_size': 512, 'execution_units': 5, 'simd_width': 256, 'prefetcher_lines': 16, 'smt_threads': 4}
+
+======================================================================
+TUNING PARAMETER 8/16: l3_latency
+======================================================================
+Possible values: [30, 35, 40, 45, 50, 55, 60]
+Current value: 45
+Other parameters fixed at: ['rob_size=96', 'l1_cache_size=64', 'l2_cache_size=320', 'issue_width=5', 'l1_latency=3', 'l2_latency=11', 'l3_cache_size=3072', 'memory_latency=250', 'memory_bandwidth=25', 'branch_predictor_size=4096', 'tlb_size=512', 'execution_units=5', 'simd_width=256', 'prefetcher_lines=16', 'smt_threads=4']
+
+  Iteration 1: NEW BEST for l3_latency
+    Value: 30, Error: 1.802308
+  Iteration 2: NEW BEST for l3_latency
+    Value: 35, Error: 1.762953
+  Iteration 3: NEW BEST for l3_latency
+    Value: 40, Error: 1.736365
+  Iteration 4: NEW BEST for l3_latency
+    Value: 45, Error: 1.723135
+
+Best value for l3_latency: 45 (error: 1.723135)
+Updated configuration: {'rob_size': 96, 'l1_cache_size': 64, 'l2_cache_size': 320, 'issue_width': 5, 'l1_latency': 3, 'l2_latency': 11, 'l3_cache_size': 3072, 'l3_latency': 45, 'memory_latency': 250, 'memory_bandwidth': 25, 'branch_predictor_size': 4096, 'tlb_size': 512, 'execution_units': 5, 'simd_width': 256, 'prefetcher_lines': 16, 'smt_threads': 4}
+
+======================================================================
+TUNING PARAMETER 9/16: memory_latency
+======================================================================
+Possible values: [100, 150, 200, 250, 300, 350, 400]
+Current value: 250
+Other parameters fixed at: ['rob_size=96', 'l1_cache_size=64', 'l2_cache_size=320', 'issue_width=5', 'l1_latency=3', 'l2_latency=11', 'l3_cache_size=3072', 'l3_latency=45', 'memory_bandwidth=25', 'branch_predictor_size=4096', 'tlb_size=512', 'execution_units=5', 'simd_width=256', 'prefetcher_lines=16', 'smt_threads=4']
+
+  Iteration 1: NEW BEST for memory_latency
+    Value: 100, Error: 2.089846
+  Iteration 2: NEW BEST for memory_latency
+    Value: 150, Error: 1.904270
+  Iteration 3: NEW BEST for memory_latency
+    Value: 200, Error: 1.777683
+  Iteration 4: NEW BEST for memory_latency
+    Value: 250, Error: 1.723135
+
+Best value for memory_latency: 250 (error: 1.723135)
+Updated configuration: {'rob_size': 96, 'l1_cache_size': 64, 'l2_cache_size': 320, 'issue_width': 5, 'l1_latency': 3, 'l2_latency': 11, 'l3_cache_size': 3072, 'l3_latency': 45, 'memory_latency': 250, 'memory_bandwidth': 25, 'branch_predictor_size': 4096, 'tlb_size': 512, 'execution_units': 5, 'simd_width': 256, 'prefetcher_lines': 16, 'smt_threads': 4}
+
+======================================================================
+TUNING PARAMETER 10/16: memory_bandwidth
+======================================================================
+Possible values: [10, 15, 20, 25, 30, 35, 40]
+Current value: 25
+Other parameters fixed at: ['rob_size=96', 'l1_cache_size=64', 'l2_cache_size=320', 'issue_width=5', 'l1_latency=3', 'l2_latency=11', 'l3_cache_size=3072', 'l3_latency=45', 'memory_latency=250', 'branch_predictor_size=4096', 'tlb_size=512', 'execution_units=5', 'simd_width=256', 'prefetcher_lines=16', 'smt_threads=4']
+
+  Iteration 1: NEW BEST for memory_bandwidth
+    Value: 10, Error: 3.184327
+  Iteration 2: NEW BEST for memory_bandwidth
+    Value: 15, Error: 2.070710
+  Iteration 3: NEW BEST for memory_bandwidth
+    Value: 20, Error: 1.764474
+  Iteration 4: NEW BEST for memory_bandwidth
+    Value: 25, Error: 1.723135
+
+Best value for memory_bandwidth: 25 (error: 1.723135)
+Updated configuration: {'rob_size': 96, 'l1_cache_size': 64, 'l2_cache_size': 320, 'issue_width': 5, 'l1_latency': 3, 'l2_latency': 11, 'l3_cache_size': 3072, 'l3_latency': 45, 'memory_latency': 250, 'memory_bandwidth': 25, 'branch_predictor_size': 4096, 'tlb_size': 512, 'execution_units': 5, 'simd_width': 256, 'prefetcher_lines': 16, 'smt_threads': 4}
+
+======================================================================
+TUNING PARAMETER 11/16: branch_predictor_size
+======================================================================
+Possible values: [512, 1024, 2048, 4096, 8192, 16384, 32768]
+Current value: 4096
+Other parameters fixed at: ['rob_size=96', 'l1_cache_size=64', 'l2_cache_size=320', 'issue_width=5', 'l1_latency=3', 'l2_latency=11', 'l3_cache_size=3072', 'l3_latency=45', 'memory_latency=250', 'memory_bandwidth=25', 'tlb_size=512', 'execution_units=5', 'simd_width=256', 'prefetcher_lines=16', 'smt_threads=4']
+
+  Iteration 1: NEW BEST for branch_predictor_size
+    Value: 512, Error: 1.938427
+  Iteration 2: NEW BEST for branch_predictor_size
+    Value: 1024, Error: 1.879197
+  Iteration 3: NEW BEST for branch_predictor_size
+    Value: 2048, Error: 1.786799
+  Iteration 4: NEW BEST for branch_predictor_size
+    Value: 4096, Error: 1.723135
+
+Best value for branch_predictor_size: 4096 (error: 1.723135)
+Updated configuration: {'rob_size': 96, 'l1_cache_size': 64, 'l2_cache_size': 320, 'issue_width': 5, 'l1_latency': 3, 'l2_latency': 11, 'l3_cache_size': 3072, 'l3_latency': 45, 'memory_latency': 250, 'memory_bandwidth': 25, 'branch_predictor_size': 4096, 'tlb_size': 512, 'execution_units': 5, 'simd_width': 256, 'prefetcher_lines': 16, 'smt_threads': 4}
+
+======================================================================
+TUNING PARAMETER 12/16: tlb_size
+======================================================================
+Possible values: [64, 128, 256, 512, 1024, 2048, 4096]
+Current value: 512
+Other parameters fixed at: ['rob_size=96', 'l1_cache_size=64', 'l2_cache_size=320', 'issue_width=5', 'l1_latency=3', 'l2_latency=11', 'l3_cache_size=3072', 'l3_latency=45', 'memory_latency=250', 'memory_bandwidth=25', 'branch_predictor_size=4096', 'execution_units=5', 'simd_width=256', 'prefetcher_lines=16', 'smt_threads=4']
+
+  Iteration 1: NEW BEST for tlb_size
+    Value: 64, Error: 1.870127
+  Iteration 2: NEW BEST for tlb_size
+    Value: 128, Error: 1.828414
+  Iteration 3: NEW BEST for tlb_size
+    Value: 256, Error: 1.764474
+  Iteration 4: NEW BEST for tlb_size
+    Value: 512, Error: 1.723135
+
+Best value for tlb_size: 512 (error: 1.723135)
+Updated configuration: {'rob_size': 96, 'l1_cache_size': 64, 'l2_cache_size': 320, 'issue_width': 5, 'l1_latency': 3, 'l2_latency': 11, 'l3_cache_size': 3072, 'l3_latency': 45, 'memory_latency': 250, 'memory_bandwidth': 25, 'branch_predictor_size': 4096, 'tlb_size': 512, 'execution_units': 5, 'simd_width': 256, 'prefetcher_lines': 16, 'smt_threads': 4}
+
+======================================================================
+TUNING PARAMETER 13/16: execution_units
+======================================================================
+Possible values: [2, 3, 4, 5, 6, 7, 8]
+Current value: 5
+Other parameters fixed at: ['rob_size=96', 'l1_cache_size=64', 'l2_cache_size=320', 'issue_width=5', 'l1_latency=3', 'l2_latency=11', 'l3_cache_size=3072', 'l3_latency=45', 'memory_latency=250', 'memory_bandwidth=25', 'branch_predictor_size=4096', 'tlb_size=512', 'simd_width=256', 'prefetcher_lines=16', 'smt_threads=4']
+
+  Iteration 1: NEW BEST for execution_units
+    Value: 2, Error: 1.917791
+  Iteration 2: NEW BEST for execution_units
+    Value: 3, Error: 1.782770
+  Iteration 3: NEW BEST for execution_units
+    Value: 4, Error: 1.723526
+  Iteration 4: NEW BEST for execution_units
+    Value: 5, Error: 1.723135
+
+Best value for execution_units: 5 (error: 1.723135)
+Updated configuration: {'rob_size': 96, 'l1_cache_size': 64, 'l2_cache_size': 320, 'issue_width': 5, 'l1_latency': 3, 'l2_latency': 11, 'l3_cache_size': 3072, 'l3_latency': 45, 'memory_latency': 250, 'memory_bandwidth': 25, 'branch_predictor_size': 4096, 'tlb_size': 512, 'execution_units': 5, 'simd_width': 256, 'prefetcher_lines': 16, 'smt_threads': 4}
+
+======================================================================
+TUNING PARAMETER 14/16: simd_width
+======================================================================
+Possible values: [128, 256, 512]
+Current value: 256
+Other parameters fixed at: ['rob_size=96', 'l1_cache_size=64', 'l2_cache_size=320', 'issue_width=5', 'l1_latency=3', 'l2_latency=11', 'l3_cache_size=3072', 'l3_latency=45', 'memory_latency=250', 'memory_bandwidth=25', 'branch_predictor_size=4096', 'tlb_size=512', 'execution_units=5', 'prefetcher_lines=16', 'smt_threads=4']
+
+  Iteration 1: NEW BEST for simd_width
+    Value: 128, Error: 1.813490
+  Iteration 2: NEW BEST for simd_width
+    Value: 256, Error: 1.723135
+
+Best value for simd_width: 256 (error: 1.723135)
+Updated configuration: {'rob_size': 96, 'l1_cache_size': 64, 'l2_cache_size': 320, 'issue_width': 5, 'l1_latency': 3, 'l2_latency': 11, 'l3_cache_size': 3072, 'l3_latency': 45, 'memory_latency': 250, 'memory_bandwidth': 25, 'branch_predictor_size': 4096, 'tlb_size': 512, 'execution_units': 5, 'simd_width': 256, 'prefetcher_lines': 16, 'smt_threads': 4}
+
+======================================================================
+TUNING PARAMETER 15/16: prefetcher_lines
+======================================================================
+Possible values: [4, 8, 12, 16, 20, 24, 32]
+Current value: 16
+Other parameters fixed at: ['rob_size=96', 'l1_cache_size=64', 'l2_cache_size=320', 'issue_width=5', 'l1_latency=3', 'l2_latency=11', 'l3_cache_size=3072', 'l3_latency=45', 'memory_latency=250', 'memory_bandwidth=25', 'branch_predictor_size=4096', 'tlb_size=512', 'execution_units=5', 'simd_width=256', 'smt_threads=4']
+
+  Iteration 1: NEW BEST for prefetcher_lines
+    Value: 4, Error: 1.786799
+  Iteration 2: NEW BEST for prefetcher_lines
+    Value: 8, Error: 1.746683
+  Iteration 3: NEW BEST for prefetcher_lines
+    Value: 12, Error: 1.725230
+  Iteration 4: NEW BEST for prefetcher_lines
+    Value: 16, Error: 1.723135
+
+Best value for prefetcher_lines: 16 (error: 1.723135)
+Updated configuration: {'rob_size': 96, 'l1_cache_size': 64, 'l2_cache_size': 320, 'issue_width': 5, 'l1_latency': 3, 'l2_latency': 11, 'l3_cache_size': 3072, 'l3_latency': 45, 'memory_latency': 250, 'memory_bandwidth': 25, 'branch_predictor_size': 4096, 'tlb_size': 512, 'execution_units': 5, 'simd_width': 256, 'prefetcher_lines': 16, 'smt_threads': 4}
+
+======================================================================
+TUNING PARAMETER 16/16: smt_threads
+======================================================================
+Possible values: [1, 2, 4, 8]
+Current value: 4
+Other parameters fixed at: ['rob_size=96', 'l1_cache_size=64', 'l2_cache_size=320', 'issue_width=5', 'l1_latency=3', 'l2_latency=11', 'l3_cache_size=3072', 'l3_latency=45', 'memory_latency=250', 'memory_bandwidth=25', 'branch_predictor_size=4096', 'tlb_size=512', 'execution_units=5', 'simd_width=256', 'prefetcher_lines=16']
+
+  Iteration 1: NEW BEST for smt_threads
+    Value: 1, Error: 1.722998
+  Iteration 1: NEW GLOBAL BEST
+    smt_threads=1, Error: 1.722998
+
+Best value for smt_threads: 1 (error: 1.722998)
+Updated configuration: {'rob_size': 96, 'l1_cache_size': 64, 'l2_cache_size': 320, 'issue_width': 5, 'l1_latency': 3, 'l2_latency': 11, 'l3_cache_size': 3072, 'l3_latency': 45, 'memory_latency': 250, 'memory_bandwidth': 25, 'branch_predictor_size': 4096, 'tlb_size': 512, 'execution_units': 5, 'simd_width': 256, 'prefetcher_lines': 16, 'smt_threads': 1}
+
+======================================================================
+VALIDATION: Comparing predicted vs actual parameters
+======================================================================
+Warning: Could not extract Windows CPU params: [WinError 2] The system cannot find the file specified
+Actual CPU parameters: {'rob_size': 128, 'l1_cache_size': 64, 'l2_cache_size': 256, 'issue_width': 4, 'l1_latency': 3, 'l2_latency': 12, 'l3_cache_size': 2048, 'l3_latency': 40, 'memory_latency': 200, 'memory_bandwidth': 25, 'branch_predictor_size': 4096, 'tlb_size': 512, 'execution_units': 4, 'simd_width': 256, 'prefetcher_lines': 16, 'smt_threads': 2}
+
+Final predicted parameters: {'rob_size': 96, 'l1_cache_size': 64, 'l2_cache_size': 320, 'issue_width': 5, 'l1_latency': 3, 'l2_latency': 11, 'l3_cache_size': 3072, 'l3_latency': 45, 'memory_latency': 250, 'memory_bandwidth': 25, 'branch_predictor_size': 4096, 'tlb_size': 512, 'execution_units': 5, 'simd_width': 256, 'prefetcher_lines': 16, 'smt_threads': 1}
+Parameter matches: 7/16 (43.8%)
+
+Parameter-by-Parameter Comparison:
+----------------------------------------------------------------------
+Parameter                 Predicted       Actual          Match     
+----------------------------------------------------------------------
+rob_size                  96              128             NO        
+l1_cache_size             64              64              YES       
+l2_cache_size             320             256             NO        
+issue_width               5               4               NO        
+l1_latency                3               3               YES       
+l2_latency                11              12              NO        
+l3_cache_size             3072            2048            NO        
+l3_latency                45              40              NO        
+memory_latency            250             200             NO        
+memory_bandwidth          25              25              YES       
+branch_predictor_size     4096            4096            YES       
+tlb_size                  512             512             YES       
+execution_units           5               4               NO        
+simd_width                256             256             YES       
+prefetcher_lines          16              16              YES       
+smt_threads               1               2               NO        
+----------------------------------------------------------------------
+Convergence plot saved: C:\Users\rahul\Desktop\CODE\MS_Project-Autotuning_Framework\data\results\sequential_autotuning_convergence.png
+
+Results saved to: C:\Users\rahul\Desktop\CODE\MS_Project-Autotuning_Framework\data\results\sequential_autotuning_results.json
+Convergence plot saved to: C:\Users\rahul\Desktop\CODE\MS_Project-Autotuning_Framework\data\results\sequential_autotuning_convergence.png

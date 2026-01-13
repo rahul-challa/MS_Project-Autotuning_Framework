@@ -1,0 +1,16 @@
+{
+  "actual_parameters": {
+    "rob_size": 128,
+    "l1_cache_size": 64,
+    "l2_cache_size": 256,
+    "issue_width": 4,
+    "l1_latency": 3,
+    "l2_latency": 12
+  },
+  "system_info": {
+    "platform": "Windows",
+    "processor": "AMD64 Family 26 Model 36 Stepping 0, AuthenticAMD",
+    "machine": "AMD64"
+  },
+  "extraction_method": "system_profiler"
+}

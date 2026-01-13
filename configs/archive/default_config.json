@@ -1,0 +1,37 @@
+{
+  "tunable_parameters": {
+    "rob_size": [64, 128, 256],
+    "l1_cache_size": [32, 64, 128],
+    "l2_cache_size": [128, 256, 512],
+    "issue_width": [2, 4, 8],
+    "l1_latency": [2, 3, 4],
+    "l2_latency": [8, 12, 16]
+  },
+  "workloads": [
+    "w1_matrix_mult",
+    "w2_bubble_sort",
+    "w3_fft_calc"
+  ],
+  "autotuning": {
+    "max_iterations": 100,
+    "randomize_order": true
+  },
+  "vtune": {
+    "collection_type": "hotspots",
+    "timeout": 300
+  },
+  "performance_model": {
+    "rob_impact": 0.50,
+    "rob_baseline": 128,
+    "width_impact": 0.40,
+    "width_baseline": 4,
+    "l1_size_impact": 0.60,
+    "l1_size_baseline": 64,
+    "l1_latency_impact": 0.20,
+    "l1_latency_baseline": 3,
+    "l2_size_impact": 0.50,
+    "l2_size_baseline": 256,
+    "l2_latency_impact": 0.25,
+    "l2_latency_baseline": 12
+  }
+}

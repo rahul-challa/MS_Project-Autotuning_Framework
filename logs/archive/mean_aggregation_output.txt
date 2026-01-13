@@ -1,0 +1,33 @@
+usage: main.py [-h]
+               {autotune,sequential-autotune,mean-aggregation-autotune,collect-ground-truth} ...
+
+Autotuning Framework for CPU Model Validation using Intel VTune Profiler
+
+positional arguments:
+  {autotune,sequential-autotune,mean-aggregation-autotune,collect-ground-truth}
+                        Command to execute
+    autotune            Run autotuning (optimized for parameter matching)
+    sequential-autotune
+                        Run sequential autotuning (one parameter at a time)
+    mean-aggregation-autotune
+                        Run sequential autotuning with mean aggregation
+                        (random start per round)
+    collect-ground-truth
+                        Collect ground truth using VTune
+
+options:
+  -h, --help            show this help message and exit
+
+Examples:
+  # Run autotuning with default settings
+  python -m interfaces.cli autotune
+
+  # Run autotuning with custom iterations
+  python -m interfaces.cli autotune --iterations 200
+
+  # Collect ground truth using VTune
+  python -m interfaces.cli collect-ground-truth
+
+  # Collect ground truth for specific workloads
+  python -m interfaces.cli collect-ground-truth --workloads w1_matrix_mult w2_bubble_sort
+        
