@@ -128,14 +128,16 @@ class VTuneProfiler:
         
         # Determine which collection types to use
         if collect_all_types:
+            # Try all available collection types, but prioritize ones that work
             collection_types = [
-                'hotspots',
-                'microarchitecture-exploration',
-                'memory-access',
-                'threading',
-                'uarch-exploration',
-                'bandwidth',
-                'memory-consumption'
+                'hotspots',  # Most basic, should work on all systems
+                'uarch-exploration',  # Microarchitecture exploration
+                'memory-access',  # Memory analysis
+                'threading',  # Threading analysis
+                'memory-consumption',  # Memory consumption
+                # Skip these as they may not be available:
+                # 'microarchitecture-exploration',  # May require admin
+                # 'bandwidth',  # May not be available
             ]
         else:
             collection_types = [collection_type]
@@ -170,13 +172,17 @@ class VTuneProfiler:
                 
                 if result.returncode != 0:
                     # Skip failed collection types (some may require admin or specific hardware)
-                    if not collect_all_types:  # Only warn if this was the only collection type
-                        print(f"Warning: VTune profiling failed for {workload_id} with {ct}")
-                        print(f"Error: {result.stderr}")
+                    print(f"Warning: VTune profiling failed for {workload_id} with {ct} (returncode: {result.returncode})")
+                    if result.stderr:
+                        print(f"  stderr: {result.stderr[:500]}")
+                    if result.stdout:
+                        print(f"  stdout: {result.stdout[:500]}")
                     continue
                 
                 # Extract metrics from VTune results
+                print(f"  Extracting metrics from {result_path}...")
                 metrics = self._extract_metrics(result_path, workload_id)
+                print(f"  Extracted {len(metrics)} metrics from {ct}")
                 
                 # Merge metrics (prefer non-default values, average if both exist)
                 for key, value in metrics.items():
@@ -192,17 +198,20 @@ class VTuneProfiler:
                         all_metrics[key] = min(all_metrics[key], value)
                 
             except subprocess.TimeoutExpired:
-                if not collect_all_types:
-                    print(f"Warning: VTune profiling timed out for {workload_id}")
+                print(f"Warning: VTune profiling timed out for {workload_id} with {ct}")
                 continue
             except Exception as e:
-                if not collect_all_types:
-                    print(f"Error profiling {workload_id}: {e}")
+                print(f"Error profiling {workload_id} with {ct}: {e}")
+                import traceback
+                traceback.print_exc()
                 continue
         
-        # If no metrics collected, return defaults
+        # If no metrics collected, raise an error
         if not all_metrics:
-            return self._get_default_metrics()
+            raise RuntimeError(
+                f"Failed to collect any metrics from VTune for {workload_id}. "
+                f"VTune profiling may have failed or returned no data."
+            )
         
         return all_metrics
     
@@ -210,6 +219,7 @@ class VTuneProfiler:
         """
         Extract comprehensive performance metrics from VTune result directory.
         
+        Uses VTune's -report command to extract metrics from the result bundle.
         Extracts all available metrics including:
         - Timing metrics (elapsed_time, cpu_time)
         - CPU metrics (CPI, IPC, CPU utilization)
@@ -224,59 +234,72 @@ class VTuneProfiler:
         
         Returns:
             Dictionary of performance metrics
+        
+        Raises:
+            RuntimeError: If metrics cannot be extracted from VTune results
         """
         metrics = {}
         
-        # Try to extract from summary file
-        summary_file = result_path / 'summary.txt'
-        if summary_file.exists():
-            with open(summary_file, 'r', encoding='utf-8', errors='ignore') as f:
-                content = f.read()
+        # First, try to extract using VTune's -report command (most reliable)
+        try:
+            # Generate summary report in text format
+            cmd = [
+                self.vtune_path,
+                '-report', 'summary',
+                '-result-dir', str(result_path),
+                '-format', 'text'
+            ]
+            
+            result = subprocess.run(
+                cmd,
+                capture_output=True,
+                text=True,
+                timeout=60,
+                cwd=os.getcwd()
+            )
+            
+            if result.returncode == 0 and result.stdout:
+                # Parse the summary report
+                report_content = result.stdout
                 
-                # Extract timing metrics
+                # Extract timing metrics from report
                 patterns = {
-                    'elapsed_time': r'Elapsed Time:\s+([\d.]+)\s+sec',
-                    'cpu_time': r'CPU Time:\s+([\d.]+)\s+sec',
-                    'cpu_utilization': r'CPU Utilization:\s+([\d.]+)%',
-                    'cpi': r'CPI Rate:\s+([\d.]+)',
-                    'ipc': r'IPC Rate:\s+([\d.]+)',
-                    'instructions_retired': r'Instructions Retired:\s+([\d.e+\-]+)',
-                    'cpu_clocks': r'CPU Clocks:\s+([\d.e+\-]+)',
+                    'elapsed_time': r'Elapsed Time[:\s]+([\d.]+)\s*(?:sec|seconds?)?',
+                    'cpu_time': r'CPU Time[:\s]+([\d.]+)\s*(?:sec|seconds?)?',
+                    'cpu_utilization': r'CPU Utilization[:\s]+([\d.]+)%?',
+                    'cpi': r'CPI Rate[:\s]+([\d.]+)',
+                    'ipc': r'IPC Rate[:\s]+([\d.]+)',
+                    'instructions_retired': r'Instructions Retired[:\s]+([\d.e+\-]+)',
+                    'cpu_clocks': r'CPU Clocks[:\s]+([\d.e+\-]+)',
+                    'l1_cache_hits': r'L1.*?hit[^s]*[:\s]+([\d.e+\-]+)',
+                    'l1_cache_misses': r'L1.*?miss[^s]*[:\s]+([\d.e+\-]+)',
+                    'l2_cache_hits': r'L2.*?hit[^s]*[:\s]+([\d.e+\-]+)',
+                    'l2_cache_misses': r'L2.*?miss[^s]*[:\s]+([\d.e+\-]+)',
+                    'l3_cache_hits': r'L3.*?hit[^s]*[:\s]+([\d.e+\-]+)',
+                    'l3_cache_misses': r'L3.*?miss[^s]*[:\s]+([\d.e+\-]+)',
+                    'memory_bandwidth': r'Memory Bandwidth[:\s]+([\d.]+)\s*([GMK]?B/s)?',
+                    'branch_mispredictions': r'Branch Mispredictions?[:\s]+([\d.e+\-]+)',
+                    'branch_predictions': r'Branch Predictions?[:\s]+([\d.e+\-]+)',
                 }
                 
                 for key, pattern in patterns.items():
-                    match = re.search(pattern, content, re.IGNORECASE)
+                    match = re.search(pattern, report_content, re.IGNORECASE | re.MULTILINE)
                     if match:
                         try:
-                            metrics[key] = float(match.group(1))
-                        except ValueError:
+                            value = float(match.group(1))
+                            metrics[key] = value
+                        except (ValueError, IndexError):
                             pass
+        except subprocess.TimeoutExpired:
+            pass  # Try other methods
+        except Exception as e:
+            pass  # Try other methods
         
-        # Try to extract from data.csv if available
-        data_file = result_path / 'data.csv'
-        if data_file.exists():
+        # Also try to extract from XML bundle file if it exists
+        vtune_bundle = list(result_path.glob('*.vtune'))
+        if vtune_bundle:
             try:
-                with open(data_file, 'r', encoding='utf-8', errors='ignore') as f:
-                    lines = f.readlines()
-                    if len(lines) > 1:
-                        # Parse CSV header and first data row
-                        headers = lines[0].strip().split(',')
-                        values = lines[1].strip().split(',')
-                        for header, value in zip(headers, values):
-                            try:
-                                # Normalize header name
-                                header_norm = header.lower().replace(' ', '_').replace('-', '_')
-                                metrics[header_norm] = float(value)
-                            except ValueError:
-                                pass
-            except Exception:
-                pass
-        
-        # Try to extract from XML result files (VTune stores detailed metrics here)
-        xml_files = list(result_path.glob('*.xml'))
-        for xml_file in xml_files:
-            try:
-                tree = ET.parse(xml_file)
+                tree = ET.parse(vtune_bundle[0])
                 root = tree.getroot()
                 
                 # Extract metrics from XML (VTune XML structure)
@@ -288,9 +311,8 @@ class VTuneProfiler:
                     if text and any(keyword in tag for keyword in ['metric', 'value', 'count', 'rate', 'time']):
                         try:
                             value = float(text)
-                            # Use tag name as metric name
                             metric_name = tag.replace('{', '').replace('}', '').split('}')[-1].lower()
-                            if metric_name not in metrics:  # Don't overwrite existing metrics
+                            if metric_name not in metrics:
                                 metrics[metric_name] = value
                         except (ValueError, AttributeError):
                             pass
@@ -308,35 +330,32 @@ class VTuneProfiler:
             except Exception:
                 pass
         
-        # Try to extract from report files
-        report_files = list(result_path.glob('*.txt')) + list(result_path.glob('*.log'))
-        for report_file in report_files:
-            if report_file.name == 'summary.txt':  # Already processed
-                continue
+        # Try to extract from summary.txt if it exists (legacy format)
+        summary_file = result_path / 'summary.txt'
+        if summary_file.exists():
             try:
-                with open(report_file, 'r', encoding='utf-8', errors='ignore') as f:
+                with open(summary_file, 'r', encoding='utf-8', errors='ignore') as f:
                     content = f.read()
                     
-                    # Extract cache metrics
-                    cache_patterns = {
-                        'l1_cache_hits': r'L1.*hit[^s]*:\s*([\d.e+\-]+)',
-                        'l1_cache_misses': r'L1.*miss[^s]*:\s*([\d.e+\-]+)',
-                        'l2_cache_hits': r'L2.*hit[^s]*:\s*([\d.e+\-]+)',
-                        'l2_cache_misses': r'L2.*miss[^s]*:\s*([\d.e+\-]+)',
-                        'l3_cache_hits': r'L3.*hit[^s]*:\s*([\d.e+\-]+)',
-                        'l3_cache_misses': r'L3.*miss[^s]*:\s*([\d.e+\-]+)',
-                        'memory_bandwidth': r'Memory Bandwidth:\s*([\d.]+)\s*([GMK]?B/s)',
-                        'branch_mispredictions': r'Branch Mispredictions?:\s*([\d.e+\-]+)',
-                        'branch_predictions': r'Branch Predictions?:\s*([\d.e+\-]+)',
+                    # Extract timing metrics
+                    patterns = {
+                        'elapsed_time': r'Elapsed Time:\s+([\d.]+)\s+sec',
+                        'cpu_time': r'CPU Time:\s+([\d.]+)\s+sec',
+                        'cpu_utilization': r'CPU Utilization:\s+([\d.]+)%',
+                        'cpi': r'CPI Rate:\s+([\d.]+)',
+                        'ipc': r'IPC Rate:\s+([\d.]+)',
+                        'instructions_retired': r'Instructions Retired:\s+([\d.e+\-]+)',
+                        'cpu_clocks': r'CPU Clocks:\s+([\d.e+\-]+)',
                     }
                     
-                    for key, pattern in cache_patterns.items():
-                        match = re.search(pattern, content, re.IGNORECASE)
-                        if match:
-                            try:
-                                metrics[key] = float(match.group(1))
-                            except ValueError:
-                                pass
+                    for key, pattern in patterns.items():
+                        if key not in metrics:  # Don't overwrite existing metrics
+                            match = re.search(pattern, content, re.IGNORECASE)
+                            if match:
+                                try:
+                                    metrics[key] = float(match.group(1))
+                                except ValueError:
+                                    pass
             except Exception:
                 pass
         
@@ -364,27 +383,24 @@ class VTuneProfiler:
                 metrics['branch_misprediction_rate'] = metrics['branch_mispredictions'] / total_branches
                 metrics['branch_prediction_accuracy'] = metrics['branch_predictions'] / total_branches
         
-        # If no metrics found, use default
-        if not metrics:
-            metrics = self._get_default_metrics()
-        
         # Ensure we have execution_time (primary metric)
         if 'elapsed_time' in metrics:
             metrics['execution_time'] = metrics['elapsed_time']
         elif 'cpu_time' in metrics:
             metrics['execution_time'] = metrics['cpu_time']
-        elif 'execution_time' not in metrics:
-            metrics['execution_time'] = 1.0  # Default fallback
+        
+        # If no metrics found, raise an error instead of returning defaults
+        if not metrics or 'execution_time' not in metrics:
+            raise RuntimeError(
+                f"Failed to extract metrics from VTune results for {workload_id}. "
+                f"Result directory: {result_path}. "
+                f"VTune may not have completed profiling successfully."
+            )
+        
+        # Mark source as VTune
+        metrics['_source'] = 'vtune'
         
         return metrics
-    
-    def _get_default_metrics(self) -> Dict[str, float]:
-        """Return default metrics when profiling fails."""
-        return {
-            'execution_time': 1.0,
-            'elapsed_time': 1.0,
-            'cpu_time': 1.0
-        }
     
     def cleanup_results(self, keep_latest: int = 10):
         """Clean up old VTune result directories."""

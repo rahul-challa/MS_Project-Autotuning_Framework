@@ -10,7 +10,9 @@ import subprocess
 import json
 import time
 import sys
+import os
 import platform
+import glob
 from pathlib import Path
 from typing import Dict, List, Optional
 from .vtune_profiler import VTuneProfiler
@@ -42,7 +44,61 @@ class BenchmarkRunner:
     def _get_python_executable(self) -> str:
         """Get the Python executable path."""
         # Use sys.executable which is the Python interpreter running this script
-        return sys.executable
+        python_exe = sys.executable
+        
+        # On Windows, sys.executable might point to the Windows Store launcher
+        # which VTune can't use. Try to resolve the actual Python executable.
+        if platform.system() == 'Windows':
+            # Check if it's the Windows Store launcher
+            if 'WindowsApps' in python_exe:
+                # Use where.exe to find all Python installations
+                try:
+                    result = subprocess.run(
+                        ['where.exe', 'python'],
+                        capture_output=True,
+                        text=True,
+                        timeout=5
+                    )
+                    if result.returncode == 0:
+                        for line in result.stdout.strip().split('\n'):
+                            line = line.strip()
+                            # Skip Windows Store launcher
+                            if line and 'WindowsApps' not in line:
+                                path = Path(line)
+                                if path.exists():
+                                    # Verify it's actually Python and not a launcher
+                                    try:
+                                        test_result = subprocess.run(
+                                            [str(path), '--version'],
+                                            capture_output=True,
+                                            timeout=5
+                                        )
+                                        if test_result.returncode == 0:
+                                            # Double-check it's not a launcher by checking file size
+                                            # Real Python executables are typically > 100KB
+                                            if path.stat().st_size > 100000:
+                                                return str(path)
+                                    except Exception:
+                                        continue
+                except Exception:
+                    pass
+                
+                # If where.exe didn't work, try common installation paths
+                import glob
+                common_patterns = [
+                    os.path.join(os.environ.get('LOCALAPPDATA', ''), 'Programs', 'Python', 'Python*', 'python.exe'),
+                    'C:\\Python*\\python.exe',
+                    'C:\\Program Files\\Python*\\python.exe',
+                ]
+                
+                for pattern in common_patterns:
+                    matches = glob.glob(pattern)
+                    for match in matches:
+                        path = Path(match)
+                        if path.exists() and path.stat().st_size > 100000:
+                            return str(path)
+        
+        return python_exe
     
     def _create_benchmark_script(self, workload_id: str, code: str) -> Path:
         """Create a temporary benchmark script file."""
@@ -206,85 +262,91 @@ print(f"Execution time: {end - start:.6f} seconds")
         self,
         workload_id: str,
         use_vtune: bool = True,
-        fallback_on_error: bool = True,
+        fallback_on_error: bool = False,
         use_all_collection_types: bool = True
     ) -> Dict[str, float]:
         """
-        Run a benchmark and collect performance metrics using all available VTune collection types.
+        Run a benchmark and collect performance metrics using VTune Profiler.
         
         Args:
             workload_id: Workload identifier
-            use_vtune: If True, use VTune profiling. If False, use simple timing.
-            fallback_on_error: If True and VTune fails, fall back to simple timing
+            use_vtune: If True, use VTune profiling (required). If False, raises error.
+            fallback_on_error: If True and VTune fails, fall back to simple timing (default: False)
             use_all_collection_types: If True, collect metrics from all compatible collection types
         
         Returns:
-            Dictionary of performance metrics (comprehensive if use_all_collection_types=True)
+            Dictionary of performance metrics from VTune (comprehensive if use_all_collection_types=True)
+        
+        Raises:
+            RuntimeError: If VTune profiling fails and fallback_on_error is False
         """
         command = self.get_workload_command(workload_id)
         
-        if use_vtune:
-            try:
-                # Use VTune to profile with all collection types
-                metrics = self.vtune.profile_workload(
-                    command,
-                    workload_id,
-                    collection_type='hotspots',
-                    collect_all_types=use_all_collection_types
-                )
-                # Check if we got valid metrics (not defaults)
-                exec_time = metrics.get('execution_time', float('inf'))
-                if exec_time != float('inf') and exec_time != 1.0:  # Not default fallback
-                    return metrics
-                elif fallback_on_error:
-                    # VTune failed, will fall through to timing
-                    pass
-                else:
-                    return metrics
-            except Exception as e:
-                if fallback_on_error:
-                    # Will fall through to timing
-                    pass
-                else:
-                    raise
+        if not use_vtune:
+            raise ValueError("VTune profiling is required. Set use_vtune=True.")
         
-        # Fallback: Simple timing without VTune (or when VTune fails)
-        # This gives us actual execution times
-        start_time = time.time()
         try:
-            result = subprocess.run(
+            # Use VTune to profile with all collection types
+            metrics = self.vtune.profile_workload(
                 command,
-                capture_output=True,
-                text=True,
-                timeout=300
+                workload_id,
+                collection_type='hotspots',
+                collect_all_types=use_all_collection_types
             )
-            end_time = time.time()
             
-            execution_time = end_time - start_time
+            # Verify we got valid metrics
+            exec_time = metrics.get('execution_time', float('inf'))
+            if exec_time == float('inf') or exec_time <= 0:
+                raise RuntimeError(f"VTune returned invalid execution time: {exec_time}")
             
-            # Try to parse execution time from output (more accurate)
-            if result.stdout:
-                import re
-                time_match = re.search(
-                    r'Execution time:\s+([\d.]+)',
-                    result.stdout,
-                    re.IGNORECASE
-                )
-                if time_match:
-                    execution_time = float(time_match.group(1))
+            return metrics
             
-            # Return actual timing metrics
-            return {
-                'execution_time': execution_time,
-                'elapsed_time': execution_time,
-                'cpu_time': execution_time,
-                '_source': 'direct_timing'  # Mark as direct timing, not VTune
-            }
-        except subprocess.TimeoutExpired:
-            return {'execution_time': float('inf')}
         except Exception as e:
-            print(f"Error running benchmark {workload_id}: {e}")
-            return {'execution_time': float('inf')}
+            if fallback_on_error:
+                # Fallback: Simple timing without VTune (only if explicitly requested)
+                print(f"Warning: VTune profiling failed for {workload_id}: {e}")
+                print(f"Falling back to direct timing (this is not recommended for accurate results)")
+                
+                start_time = time.time()
+                try:
+                    result = subprocess.run(
+                        command,
+                        capture_output=True,
+                        text=True,
+                        timeout=300
+                    )
+                    end_time = time.time()
+                    
+                    execution_time = end_time - start_time
+                    
+                    # Try to parse execution time from output (more accurate)
+                    if result.stdout:
+                        import re
+                        time_match = re.search(
+                            r'Execution time:\s+([\d.]+)',
+                            result.stdout,
+                            re.IGNORECASE
+                        )
+                        if time_match:
+                            execution_time = float(time_match.group(1))
+                    
+                    # Return actual timing metrics
+                    return {
+                        'execution_time': execution_time,
+                        'elapsed_time': execution_time,
+                        'cpu_time': execution_time,
+                        '_source': 'direct_timing'  # Mark as direct timing, not VTune
+                    }
+                except subprocess.TimeoutExpired:
+                    raise RuntimeError(f"Benchmark {workload_id} timed out")
+                except Exception as e2:
+                    raise RuntimeError(f"Both VTune and fallback timing failed for {workload_id}: {e2}")
+            else:
+                # No fallback - raise the error
+                raise RuntimeError(
+                    f"VTune profiling failed for {workload_id}: {e}. "
+                    f"Set fallback_on_error=True to use direct timing (not recommended)."
+                ) from e
     
     def collect_ground_truth(
         self,
