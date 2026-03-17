@@ -1,15 +1,15 @@
 # CPU Microarchitecture Autotuning Framework
 
-An advanced autotuning framework that uses sequential parameter tuning and Intel VTune Profiler to accurately predict CPU microarchitecture parameters. The framework achieves **56.25% parameter matching accuracy** by iteratively refining predictions over multiple rounds.
+An autotuning framework that uses **sequential parameter tuning** and (optionally) the **MacSim CPU simulator** to predict CPU microarchitecture parameters from **performance metrics only**. The included example run achieves **56.25% parameter matching accuracy** via multi-round refinement.
 
 ## Key Features
 
 - **Sequential Tuning**: Optimizes one parameter at a time for maximum accuracy
 - **Multi-Round Refinement**: Uses 5 rounds to iteratively refine parameter predictions
 - **Correct Methodology**: Predicts CPU parameters using ONLY performance metrics (ground truth)
-- **Multi-Metric Support**: Uses all VTune collection types and metrics for comprehensive profiling
+- **Multi-Metric Support**: Uses comprehensive MacSim simulation metrics for profiling
 - **15 Diverse Workloads**: Comprehensive benchmark suite covering various CPU characteristics
-- **Real Hardware Profiling**: Uses Intel VTune Profiler for ground truth collection
+- **CPU Simulation**: Uses MacSim CPU simulator for ground truth collection
 - **Performance Model**: Analytical model estimates execution time for different CPU configurations
 - **Validation**: Compares predicted vs actual parameters at the end (actual params NOT used during optimization)
 
@@ -17,7 +17,7 @@ An advanced autotuning framework that uses sequential parameter tuning and Intel
 
 The framework predicts CPU microarchitecture parameters using **ONLY performance metrics**:
 
-1. **Collect Ground Truth**: Profile workloads with VTune to get performance metrics
+1. **Collect Ground Truth**: Simulate workloads with MacSim to get performance metrics
 2. **Sequential Optimization**: Tune one parameter at a time, keeping others fixed at their best values
 3. **Multi-Round Refinement**: Repeat the sequential process for multiple rounds to refine predictions
 4. **Validate**: Compare predicted parameters vs actual parameters (actual params NOT used during optimization)
@@ -31,7 +31,7 @@ Get started with the CPU Microarchitecture Autotuning Framework in minutes.
 ### Prerequisites
 
 - **Python 3.7+**
-- **Intel VTune Profiler** (optional, falls back to timing if not available)
+- **MacSim CPU Simulator** (optional; if absent, the framework falls back to direct timing)
 - **NumPy, Matplotlib** (installed automatically with package)
 
 ### Installation
@@ -41,12 +41,14 @@ Get started with the CPU Microarchitecture Autotuning Framework in minutes.
 git clone <repository-url>
 cd MS_Project-Autotuning_Framework
 
-# Install as a package (includes all dependencies)
-pip install -e .
+# Install (recommended)
+python3 -m pip install -e .
 
-# Or install dependencies manually
-pip install numpy matplotlib
+# Or install dependencies only
+python3 -m pip install -r requirements.txt
 ```
+
+If your OS uses an “externally managed” Python environment (PEP 668), install in a virtual environment or via `pipx`.
 
 ### Step-by-Step Usage
 
@@ -55,7 +57,7 @@ pip install numpy matplotlib
 Collect performance metrics for all workloads:
 
 ```bash
-python main.py collect-ground-truth
+autotune collect-ground-truth
 ```
 
 This will:
@@ -69,13 +71,13 @@ Run the sequential autotuning (default: 5 rounds × 5000 iterations per paramete
 
 ```bash
 # Default configuration (recommended for best accuracy)
-python main.py autotune
+autotune autotune
 
 # Or simply (defaults to autotune)
-python main.py
+autotune
 
 # Custom configuration
-python main.py autotune --rounds 3 --iterations-per-param 3000
+autotune autotune --rounds 3 --iterations-per-param 3000
 ```
 
 This will:
@@ -103,10 +105,10 @@ cat data/results/sequential_autotuning_results.json
 
 ```bash
 # More rounds for better refinement
-python main.py autotune --rounds 10 --iterations-per-param 5000
+autotune autotune --rounds 10 --iterations-per-param 5000
 
 # Faster run with fewer iterations
-python main.py autotune --rounds 3 --iterations-per-param 2000
+autotune autotune --rounds 3 --iterations-per-param 2000
 ```
 
 #### List Available Workloads
@@ -114,6 +116,34 @@ python main.py autotune --rounds 3 --iterations-per-param 2000
 ```bash
 python scripts/list_workloads.py
 ```
+
+## Packaging / Distribution
+
+Build a wheel + sdist:
+
+```bash
+python3 -m pip install --upgrade build
+python3 -m build
+```
+
+Install the built wheel (example):
+
+```bash
+python3 -m pip install dist/autotuning_framework-*.whl
+autotune --help
+```
+
+## Report graphs (experiments)
+
+The `report/` folder contains an experiment runner that executes multiple autotuning runs and generates figures:
+
+```bash
+python3 report/run_experiments.py
+```
+
+Outputs:
+- Figures: `report/images/rounds_sweep.png`, `report/images/iters_sweep.png`
+- Logs: `report/results/experiments.csv`, `report/results/experiments.jsonl`
 
 ### Expected Results
 
@@ -125,9 +155,9 @@ With default settings (5 rounds × 5000 iterations per parameter):
 
 ### Troubleshooting
 
-#### VTune Not Found
+#### MacSim Not Found
 
-The framework automatically uses timing fallback. No action needed.
+Ensure MacSim is installed in the parent directory of the project folder. The framework will automatically locate it.
 
 #### Low Accuracy
 
@@ -135,9 +165,9 @@ The framework automatically uses timing fallback. No action needed.
 2. Increase iterations per parameter: `--iterations-per-param 10000`
 3. Ensure ground truth has diverse execution times
 
-#### Permission Errors
+#### Simulation Errors
 
-VTune may require admin privileges. Framework works without VTune using timing fallback.
+If MacSim simulation fails, the framework will fall back to direct timing measurements.
 
 ### Programmatic Usage
 
@@ -189,7 +219,7 @@ MS_Project-Autotuning_Framework/
 │   ├── interfaces/              # User interfaces
 │   │   └── cli.py               # Command-line interface
 │   └── archive/                 # Archived legacy code
-│       └── vtune_autotuner/     # Legacy VTune integration
+│       └── archive/              # Archived code (including legacy VTune integration)
 │
 ├── scripts/                      # Utility scripts
 │   ├── collect_ground_truth.py
@@ -312,7 +342,7 @@ The autotuning process generates:
 
 3. **Ground Truth** (`data/results/ground_truth.json`)
    - Execution times for all workloads
-   - Comprehensive metrics (when VTune available)
+   - Comprehensive metrics (when MacSim available)
 
 ## Configuration Options
 
@@ -331,27 +361,26 @@ python main.py autotune --rounds 10 --iterations-per-param 10000
 python main.py autotune --rounds 3 --iterations-per-param 2000
 ```
 
-## Intel VTune Profiler Integration
+## MacSim CPU Simulator Integration
 
-The framework uses Intel VTune Profiler for comprehensive performance profiling:
+The framework uses MacSim CPU simulator for comprehensive performance profiling:
 
-### Supported Collection Types
+### Simulation Features
 
-- **`hotspots`** - Basic CPU hotspots analysis (used by all workloads)
-- **`microarchitecture-exploration`** - Detailed microarchitecture analysis (requires admin privileges)
-- **`memory-access`** - Memory access pattern analysis
-- **`bandwidth`** - Memory bandwidth analysis
+- **Configurable CPU Parameters** - Simulate different microarchitecture configurations
+- **Performance Metrics** - Extract execution time, CPI, IPC, cache metrics
+- **Trace-based Simulation** - Supports trace-driven simulation for accurate results
 
 ### Fallback Mode
 
-If VTune is not available, the framework automatically falls back to direct timing measurements:
+If MacSim simulation is not available, the framework automatically falls back to direct timing measurements:
 - Works on Windows, Linux, macOS
-- No administrator privileges required
+- No special privileges required
 - Still achieves high accuracy (56.25% parameter matching)
 
 ## How It Works
 
-1. **Ground Truth Collection**: Profiles workloads with VTune (or timing fallback) to get performance metrics
+1. **Ground Truth Collection**: Simulates workloads with MacSim (or timing fallback) to get performance metrics
 2. **Sequential Optimization**: Tunes one parameter at a time, keeping others fixed at their best values
 3. **Multi-Round Refinement**: Repeats the sequential process for multiple rounds to refine predictions
 4. **System Profiling**: Extracts actual CPU parameters from the system (for validation only)
@@ -397,11 +426,11 @@ python main.py autotune
 
 ## Troubleshooting
 
-### VTune Not Available
+### MacSim Not Available
 
-The framework automatically falls back to direct timing if VTune is unavailable:
+The framework automatically falls back to direct timing if MacSim is unavailable:
 - Works on Windows, Linux, macOS
-- No administrator privileges required
+- No special privileges required
 - Still achieves high accuracy
 
 ### Low Match Percentage
@@ -411,19 +440,18 @@ If parameter matching is low:
 2. Increase iterations per parameter: `--iterations-per-param 10000`
 3. Check ground truth diversity (should have varied execution times)
 
-### Permission Issues
+### MacSim Installation
 
-VTune may require administrator privileges for full features:
-- On Linux: `sudo sysctl -w kernel.perf_event_paranoid=1`
-- On Windows: Run as Administrator
-- Framework works without VTune (uses timing fallback)
+MacSim should be installed in the parent directory of the project folder:
+- Expected path: `../macsim/bin/macsim`
+- The framework will automatically locate MacSim if installed correctly
 
 ## Project Requirements
 
 - **Objective**: Find parameter assignment AP that minimizes performance prediction error
 - **Error Metric**: Performance prediction error (actual parameters NOT used during optimization)
 - **Algorithm**: Sequential Tuning with Multi-Round Refinement
-- **Profiler**: Intel VTune Profiler (with timing fallback)
+- **Profiler**: MacSim CPU Simulator (with timing fallback)
 - **Workloads**: 15 diverse benchmarks
 - **Accuracy Target**: Maximize parameter matching percentage (currently 56.25%)
 
@@ -437,7 +465,7 @@ We welcome contributions! Here's how to get started:
   - `sequential_tuner.py`: Main sequential autotuning logic
   - `mab_autotuner.py`: Multi-Armed Bandit autotuning (legacy)
   - `enhanced_performance_model.py`: Performance estimation model
-  - `vtune_profiler.py`: VTune integration
+  - `macsim_profiler.py`: MacSim integration
   - `benchmark_runner.py`: Benchmark execution
   - `workload_registry.py`: Workload definitions
 
@@ -508,9 +536,9 @@ Viswanadh Rahul Challa
 
 ## Acknowledgments
 
-- Intel VTune Profiler for performance profiling capabilities
+- MacSim CPU Simulator for performance simulation capabilities
 - Sequential tuning approach for systematic optimization
 
 ## References
 
-- Intel VTune Profiler: https://www.intel.com/content/www/us/en/developer/tools/oneapi/vtune-profiler.html
+- MacSim CPU Simulator: https://github.com/gthparch/macsim

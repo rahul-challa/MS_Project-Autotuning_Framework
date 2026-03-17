@@ -2,11 +2,12 @@
 """
 Workload Registry
 
-Comprehensive registry of all workloads that can be profiled with VTune.
+Comprehensive registry of all workloads that can be profiled with MacSim.
 These workloads stress different CPU components and characteristics.
 """
 
-# VTune Collection Types - All Available Types
+# MacSim Collection Types - Legacy (kept for compatibility)
+# Note: MacSim doesn't use collection types like VTune, but we keep this for compatibility
 VTUNE_COLLECTION_TYPES = [
     'hotspots',                    # Basic CPU hotspots
     'microarchitecture-exploration',  # Microarchitecture analysis (requires admin)
@@ -764,7 +765,7 @@ def get_workload_info(workload_id: str) -> dict:
 
 
 def get_recommended_collection_types(workload_id: str) -> list:
-    """Get recommended VTune collection types for a workload."""
+    """Get recommended collection types for a workload (legacy - MacSim doesn't use collection types)."""
     if workload_id in WORKLOADS:
         return WORKLOADS[workload_id].get('collection_types', ['hotspots'])
     return ['hotspots']

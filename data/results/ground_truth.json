@@ -1,187 +1,187 @@
 {
   "w1_matrix_mult": {
-    "execution_time": 0.074778,
-    "elapsed_time": 0.074778,
-    "cpu_time": 0.074778,
-    "_source": "direct_timing"
+    "execution_time": 0.135861,
+    "elapsed_time": 0.135861,
+    "cpu_time": 0.135861,
+    "_source": "macsim"
   },
   "w2_bubble_sort": {
-    "execution_time": 6.455411,
-    "elapsed_time": 6.455411,
-    "cpu_time": 6.455411,
-    "_source": "direct_timing"
+    "execution_time": 0.151895,
+    "elapsed_time": 0.151895,
+    "cpu_time": 0.151895,
+    "_source": "macsim"
   },
   "w3_fft_calc": {
-    "execution_time": 0.032594,
-    "elapsed_time": 0.032594,
-    "cpu_time": 0.032594,
-    "_source": "direct_timing"
+    "execution_time": 0.362342,
+    "elapsed_time": 0.362342,
+    "cpu_time": 0.362342,
+    "_source": "macsim"
   },
   "w4_memory_intensive": {
-    "execution_time": 0.008099,
-    "elapsed_time": 0.008099,
-    "cpu_time": 0.008099,
-    "_source": "direct_timing"
+    "execution_time": 0.035344,
+    "elapsed_time": 0.035344,
+    "cpu_time": 0.035344,
+    "_source": "macsim"
   },
   "w5_compute_intensive": {
-    "execution_time": 0.066689,
-    "elapsed_time": 0.066689,
-    "cpu_time": 0.066689,
-    "_source": "direct_timing"
+    "execution_time": 0.061214,
+    "elapsed_time": 0.061214,
+    "cpu_time": 0.061214,
+    "_source": "macsim"
   },
   "w6_branch_intensive": {
-    "execution_time": 0.005688,
-    "elapsed_time": 0.005688,
-    "cpu_time": 0.005688,
-    "_source": "direct_timing"
+    "execution_time": 0.002495,
+    "elapsed_time": 0.002495,
+    "cpu_time": 0.002495,
+    "_source": "macsim"
   },
   "w7_cache_friendly": {
-    "execution_time": 0.025718,
-    "elapsed_time": 0.025718,
-    "cpu_time": 0.025718,
-    "_source": "direct_timing"
+    "execution_time": 0.230326,
+    "elapsed_time": 0.230326,
+    "cpu_time": 0.230326,
+    "_source": "macsim"
   },
   "w8_mixed_workload": {
-    "execution_time": 0.022374,
-    "elapsed_time": 0.022374,
-    "cpu_time": 0.022374,
-    "_source": "direct_timing"
+    "execution_time": 0.124895,
+    "elapsed_time": 0.124895,
+    "cpu_time": 0.124895,
+    "_source": "macsim"
   },
   "w9_vector_ops": {
-    "execution_time": 0.257368,
-    "elapsed_time": 0.257368,
-    "cpu_time": 0.257368,
-    "_source": "direct_timing"
+    "execution_time": 0.039988,
+    "elapsed_time": 0.039988,
+    "cpu_time": 0.039988,
+    "_source": "macsim"
   },
   "w10_nested_loops": {
-    "execution_time": 0.751427,
-    "elapsed_time": 0.751427,
-    "cpu_time": 0.751427,
-    "_source": "direct_timing"
+    "execution_time": 0.313298,
+    "elapsed_time": 0.313298,
+    "cpu_time": 0.313298,
+    "_source": "macsim"
   },
   "w11_string_processing": {
-    "execution_time": 0.021916,
-    "elapsed_time": 0.021916,
-    "cpu_time": 0.021916,
-    "_source": "direct_timing"
+    "execution_time": 0.004005,
+    "elapsed_time": 0.004005,
+    "cpu_time": 0.004005,
+    "_source": "macsim"
   },
   "w12_recursive": {
-    "execution_time": 0.99604,
-    "elapsed_time": 0.99604,
-    "cpu_time": 0.99604,
-    "_source": "direct_timing"
+    "execution_time": 0.083515,
+    "elapsed_time": 0.083515,
+    "cpu_time": 0.083515,
+    "_source": "macsim"
   },
   "w13_hash_table": {
-    "execution_time": 0.02998,
-    "elapsed_time": 0.02998,
-    "cpu_time": 0.02998,
-    "_source": "direct_timing"
+    "execution_time": 0.00285,
+    "elapsed_time": 0.00285,
+    "cpu_time": 0.00285,
+    "_source": "macsim"
   },
   "w14_matrix_decomp": {
-    "execution_time": 0.5419695377349854,
-    "elapsed_time": 0.5419695377349854,
-    "cpu_time": 0.5419695377349854,
-    "_source": "direct_timing"
+    "execution_time": 0.007008,
+    "elapsed_time": 0.007008,
+    "cpu_time": 0.007008,
+    "_source": "macsim"
   },
   "w15_pattern_matching": {
-    "execution_time": 0.000863,
-    "elapsed_time": 0.000863,
-    "cpu_time": 0.000863,
-    "_source": "direct_timing"
+    "execution_time": 0.01277,
+    "elapsed_time": 0.01277,
+    "cpu_time": 0.01277,
+    "_source": "macsim"
   },
   "w16_quicksort": {
-    "execution_time": 0.983316,
-    "elapsed_time": 0.983316,
-    "cpu_time": 0.983316,
-    "_source": "direct_timing"
+    "execution_time": 0.002559,
+    "elapsed_time": 0.002559,
+    "cpu_time": 0.002559,
+    "_source": "macsim"
   },
   "w17_linpack": {
-    "execution_time": 1.317189,
-    "elapsed_time": 1.317189,
-    "cpu_time": 1.317189,
-    "_source": "direct_timing"
+    "execution_time": 0.11997,
+    "elapsed_time": 0.11997,
+    "cpu_time": 0.11997,
+    "_source": "macsim"
   },
   "w18_fft_2d": {
-    "execution_time": 0.107994,
-    "elapsed_time": 0.107994,
-    "cpu_time": 0.107994,
-    "_source": "direct_timing"
+    "execution_time": 0.366506,
+    "elapsed_time": 0.366506,
+    "cpu_time": 0.366506,
+    "_source": "macsim"
   },
   "w19_monte_carlo": {
-    "execution_time": 2.002478,
-    "elapsed_time": 2.002478,
-    "cpu_time": 2.002478,
-    "_source": "direct_timing"
+    "execution_time": 0.037629,
+    "elapsed_time": 0.037629,
+    "cpu_time": 0.037629,
+    "_source": "macsim"
   },
   "w20_sparse_matrix": {
-    "execution_time": 0.362163782119751,
-    "elapsed_time": 0.362163782119751,
-    "cpu_time": 0.362163782119751,
-    "_source": "direct_timing"
+    "execution_time": 0.00369,
+    "elapsed_time": 0.00369,
+    "cpu_time": 0.00369,
+    "_source": "macsim"
   },
   "w21_tree_traversal": {
-    "execution_time": 0.009845,
-    "elapsed_time": 0.009845,
-    "cpu_time": 0.009845,
-    "_source": "direct_timing"
+    "execution_time": 0.000638,
+    "elapsed_time": 0.000638,
+    "cpu_time": 0.000638,
+    "_source": "macsim"
   },
   "w22_graph_bfs": {
-    "execution_time": 0.079619,
-    "elapsed_time": 0.079619,
-    "cpu_time": 0.079619,
-    "_source": "direct_timing"
+    "execution_time": 0.000899,
+    "elapsed_time": 0.000899,
+    "cpu_time": 0.000899,
+    "_source": "macsim"
   },
   "w23_image_processing": {
-    "execution_time": 0.34505748748779297,
-    "elapsed_time": 0.34505748748779297,
-    "cpu_time": 0.34505748748779297,
-    "_source": "direct_timing"
+    "execution_time": 0.004438,
+    "elapsed_time": 0.004438,
+    "cpu_time": 0.004438,
+    "_source": "macsim"
   },
   "w24_cryptographic": {
-    "execution_time": 0.124244,
-    "elapsed_time": 0.124244,
-    "cpu_time": 0.124244,
-    "_source": "direct_timing"
+    "execution_time": 0.001563,
+    "elapsed_time": 0.001563,
+    "cpu_time": 0.001563,
+    "_source": "macsim"
   },
   "w25_database_query": {
-    "execution_time": 0.020509,
-    "elapsed_time": 0.020509,
-    "cpu_time": 0.020509,
-    "_source": "direct_timing"
+    "execution_time": 0.004972,
+    "elapsed_time": 0.004972,
+    "cpu_time": 0.004972,
+    "_source": "macsim"
   },
   "w26_nbody_simulation": {
-    "execution_time": 43.635065,
-    "elapsed_time": 43.635065,
-    "cpu_time": 43.635065,
-    "_source": "direct_timing"
+    "execution_time": 0.021101,
+    "elapsed_time": 0.021101,
+    "cpu_time": 0.021101,
+    "_source": "macsim"
   },
   "w27_compression": {
-    "execution_time": 3.950834,
-    "elapsed_time": 3.950834,
-    "cpu_time": 3.950834,
-    "_source": "direct_timing"
+    "execution_time": 0.030015,
+    "elapsed_time": 0.030015,
+    "cpu_time": 0.030015,
+    "_source": "macsim"
   },
   "w28_neural_network": {
-    "execution_time": 0.01863,
-    "elapsed_time": 0.01863,
-    "cpu_time": 0.01863,
-    "_source": "direct_timing"
+    "execution_time": 0.183074,
+    "elapsed_time": 0.183074,
+    "cpu_time": 0.183074,
+    "_source": "macsim"
   },
   "w29_particle_filter": {
-    "execution_time": 0.064888,
-    "elapsed_time": 0.064888,
-    "cpu_time": 0.064888,
-    "_source": "direct_timing"
+    "execution_time": 0.033188,
+    "elapsed_time": 0.033188,
+    "cpu_time": 0.033188,
+    "_source": "macsim"
   },
   "w30_ray_tracing": {
-    "execution_time": 293.797874,
-    "elapsed_time": 293.797874,
-    "cpu_time": 293.797874,
-    "_source": "direct_timing"
+    "execution_time": 0.130438,
+    "elapsed_time": 0.130438,
+    "cpu_time": 0.130438,
+    "_source": "macsim"
   },
   "_metadata": {
-    "source": "VTune Profiler",
-    "collection_method": "all_collection_types",
+    "source": "MacSim CPU Simulator",
+    "collection_method": "macsim_simulation",
     "workloads": [
       "w1_matrix_mult",
       "w2_bubble_sort",
@@ -216,9 +216,9 @@
     ],
     "metrics_collected": [
       "_source",
+      "execution_time",
       "elapsed_time",
-      "cpu_time",
-      "execution_time"
+      "cpu_time"
     ]
   }
 }

@@ -3,7 +3,7 @@
 Benchmark Runner Module
 
 This module provides functions to run benchmarks and collect performance
-metrics. It integrates with VTune Profiler to get ground truth measurements.
+metrics. It integrates with MacSim CPU simulator to get ground truth measurements.
 """
 
 import subprocess
@@ -15,7 +15,7 @@ import platform
 import glob
 from pathlib import Path
 from typing import Dict, List, Optional
-from .vtune_profiler import VTuneProfiler
+from .macsim_profiler import MacSimProfiler
 from .workload_registry import (
     WORKLOADS,
     get_all_workloads,
@@ -27,17 +27,17 @@ from .workload_registry import (
 
 class BenchmarkRunner:
     """
-    Runs benchmarks and collects performance metrics using VTune.
+    Runs benchmarks and collects performance metrics using MacSim.
     """
     
-    def __init__(self, vtune_profiler: Optional[VTuneProfiler] = None):
+    def __init__(self, macsim_profiler: Optional[MacSimProfiler] = None):
         """
         Initialize benchmark runner.
         
         Args:
-            vtune_profiler: VTuneProfiler instance. If None, creates a new one.
+            macsim_profiler: MacSimProfiler instance. If None, creates a new one.
         """
-        self.vtune = vtune_profiler or VTuneProfiler()
+        self.macsim = macsim_profiler or MacSimProfiler()
         self.benchmark_dir = Path(__file__).parent.parent.parent / 'data' / 'benchmarks'
         self.benchmark_dir.mkdir(parents=True, exist_ok=True)
     
@@ -47,7 +47,7 @@ class BenchmarkRunner:
         python_exe = sys.executable
         
         # On Windows, sys.executable might point to the Windows Store launcher
-        # which VTune can't use. Try to resolve the actual Python executable.
+        # which MacSim can't use. Try to resolve the actual Python executable.
         if platform.system() == 'Windows':
             # Check if it's the Windows Store launcher
             if 'WindowsApps' in python_exe:
@@ -246,7 +246,7 @@ print(f"Execution time: {end - start:.6f} seconds")
         }
         
         if workload_id in workload_code:
-            # Create temporary script file (VTune works better with script files on Windows)
+            # Create temporary script file (MacSim works better with script files)
             script_file = self._create_benchmark_script(workload_id, workload_code[workload_id])
             return [python_exe, str(script_file)]
         
@@ -261,50 +261,49 @@ print(f"Execution time: {end - start:.6f} seconds")
     def run_benchmark(
         self,
         workload_id: str,
-        use_vtune: bool = True,
-        fallback_on_error: bool = False,
-        use_all_collection_types: bool = True
+        use_macsim: bool = True,
+        fallback_on_error: bool = True,  # Default to True for robustness
+        cpu_params: Optional[Dict[str, int]] = None
     ) -> Dict[str, float]:
         """
-        Run a benchmark and collect performance metrics using VTune Profiler.
+        Run a benchmark and collect performance metrics using MacSim CPU simulator.
         
         Args:
             workload_id: Workload identifier
-            use_vtune: If True, use VTune profiling (required). If False, raises error.
-            fallback_on_error: If True and VTune fails, fall back to simple timing (default: False)
-            use_all_collection_types: If True, collect metrics from all compatible collection types
+            use_macsim: If True, use MacSim simulation (required). If False, raises error.
+            fallback_on_error: If True and MacSim fails, fall back to simple timing (default: False)
+            cpu_params: Optional CPU microarchitecture parameters for MacSim configuration
         
         Returns:
-            Dictionary of performance metrics from VTune (comprehensive if use_all_collection_types=True)
+            Dictionary of performance metrics from MacSim
         
         Raises:
-            RuntimeError: If VTune profiling fails and fallback_on_error is False
+            RuntimeError: If MacSim profiling fails and fallback_on_error is False
         """
         command = self.get_workload_command(workload_id)
         
-        if not use_vtune:
-            raise ValueError("VTune profiling is required. Set use_vtune=True.")
+        if not use_macsim:
+            raise ValueError("MacSim simulation is required. Set use_macsim=True.")
         
         try:
-            # Use VTune to profile with all collection types
-            metrics = self.vtune.profile_workload(
+            # Use MacSim to profile workload
+            metrics = self.macsim.profile_workload(
                 command,
                 workload_id,
-                collection_type='hotspots',
-                collect_all_types=use_all_collection_types
+                cpu_params=cpu_params
             )
             
             # Verify we got valid metrics
             exec_time = metrics.get('execution_time', float('inf'))
             if exec_time == float('inf') or exec_time <= 0:
-                raise RuntimeError(f"VTune returned invalid execution time: {exec_time}")
+                raise RuntimeError(f"MacSim returned invalid execution time: {exec_time}")
             
             return metrics
             
         except Exception as e:
             if fallback_on_error:
-                # Fallback: Simple timing without VTune (only if explicitly requested)
-                print(f"Warning: VTune profiling failed for {workload_id}: {e}")
+                # Fallback: Simple timing without MacSim (only if explicitly requested)
+                print(f"Warning: MacSim simulation failed for {workload_id}: {e}")
                 print(f"Falling back to direct timing (this is not recommended for accurate results)")
                 
                 start_time = time.time()
@@ -335,16 +334,16 @@ print(f"Execution time: {end - start:.6f} seconds")
                         'execution_time': execution_time,
                         'elapsed_time': execution_time,
                         'cpu_time': execution_time,
-                        '_source': 'direct_timing'  # Mark as direct timing, not VTune
+                        '_source': 'direct_timing'  # Mark as direct timing, not MacSim
                     }
                 except subprocess.TimeoutExpired:
                     raise RuntimeError(f"Benchmark {workload_id} timed out")
                 except Exception as e2:
-                    raise RuntimeError(f"Both VTune and fallback timing failed for {workload_id}: {e2}")
+                    raise RuntimeError(f"Both MacSim and fallback timing failed for {workload_id}: {e2}")
             else:
                 # No fallback - raise the error
                 raise RuntimeError(
-                    f"VTune profiling failed for {workload_id}: {e}. "
+                    f"MacSim simulation failed for {workload_id}: {e}. "
                     f"Set fallback_on_error=True to use direct timing (not recommended)."
                 ) from e
     
@@ -352,18 +351,18 @@ print(f"Execution time: {end - start:.6f} seconds")
         self,
         workload_ids: Optional[List[str]] = None,
         output_file: Optional[Path] = None,
-        use_all_collection_types: bool = True
+        cpu_params: Optional[Dict[str, int]] = None
     ) -> Dict[str, Dict[str, float]]:
         """
         Collect comprehensive ground truth performance metrics for ALL workloads.
         
-        Collects metrics from ALL VTune collection types to maximize accuracy.
+        Collects metrics using MacSim CPU simulator.
         Uses ALL available workloads if workload_ids is None.
         
         Args:
             workload_ids: List of workload identifiers (None = use ALL workloads)
             output_file: Path to save ground truth JSON file
-            use_all_collection_types: If True, use ALL compatible collection types
+            cpu_params: Optional CPU microarchitecture parameters for MacSim configuration
         
         Returns:
             Dictionary mapping workload_id to comprehensive metrics dictionary
@@ -375,16 +374,15 @@ print(f"Execution time: {end - start:.6f} seconds")
         
         ground_truth = {}
         
-        print("Collecting comprehensive ground truth performance metrics using VTune...")
+        print("Collecting comprehensive ground truth performance metrics using MacSim...")
         print(f"  Workloads: {len(workload_ids)}")
-        print(f"  Using ALL collection types: {use_all_collection_types}")
         
         for workload_id in workload_ids:
             print(f"  Profiling {workload_id}...")
             metrics = self.run_benchmark(
                 workload_id,
-                use_vtune=True,
-                use_all_collection_types=use_all_collection_types
+                use_macsim=True,
+                cpu_params=cpu_params
             )
             # Store all metrics, not just execution_time
             ground_truth[workload_id] = metrics
@@ -408,8 +406,8 @@ print(f"Execution time: {end - start:.6f} seconds")
         
         # Add metadata
         ground_truth['_metadata'] = {
-            'source': 'VTune Profiler',
-            'collection_method': 'all_collection_types' if use_all_collection_types else 'hotspots',
+            'source': 'MacSim CPU Simulator',
+            'collection_method': 'macsim_simulation',
             'workloads': workload_ids,
             'metrics_collected': list(set(
                 key for wl_id, metrics_dict in ground_truth.items()
@@ -420,7 +418,7 @@ print(f"Execution time: {end - start:.6f} seconds")
         
         # Save to file
         if output_file is None:
-            output_file = Path(__file__).parent.parent.parent / 'data' / 'results' / 'vtune_ground_truth.json'
+            output_file = Path(__file__).parent.parent.parent / 'data' / 'results' / 'ground_truth.json'
         
         output_file.parent.mkdir(parents=True, exist_ok=True)
         with open(output_file, 'w') as f:

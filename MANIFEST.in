@@ -1,0 +1,16 @@
+include README.md
+include LICENSE
+include pyproject.toml
+include requirements.txt
+
+# Include a small, reproducible sample dataset (kept in git)
+recursive-include data/results ground_truth.json
+
+# Useful docs (kept in repo)
+recursive-include docs *.md
+
+# Exclude bulky/derived artifacts from source distributions
+prune macsim_results
+prune logs
+prune data/results/archive
+prune docs/archive

@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "autotuning-framework"
 version = "1.0.0"
-description = "Autotuning Framework for CPU Model Validation using Intel VTune Profiler"
+description = "Autotuning Framework for CPU Model Validation using MacSim (with timing fallback)"
 readme = "README.md"
 requires-python = ">=3.7"
 license = {text = "MIT"}
@@ -35,6 +35,10 @@ dev = [
     "pytest-cov>=4.0.0",
     "black>=23.0.0",
     "flake8>=6.0.0",
+]
+release = [
+    "build>=1.0.0",
+    "twine>=5.0.0",
 ]
 
 [project.scripts]

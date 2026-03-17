@@ -2,8 +2,8 @@
 """
 System Profiler Module
 
-Extracts actual CPU microarchitecture parameters from the system using VTune
-and system information tools.
+Extracts actual CPU microarchitecture parameters from the system using
+system information tools.
 """
 
 import subprocess
@@ -12,7 +12,6 @@ import re
 import json
 from pathlib import Path
 from typing import Dict, Optional
-from .vtune_profiler import VTuneProfiler
 
 
 class SystemProfiler:
@@ -20,9 +19,8 @@ class SystemProfiler:
     Extracts actual CPU microarchitecture parameters from the system.
     """
     
-    def __init__(self, vtune_profiler: Optional[VTuneProfiler] = None):
+    def __init__(self):
         """Initialize system profiler."""
-        self.vtune = vtune_profiler or VTuneProfiler()
         self.system_info = self._get_system_info()
     
     def _get_system_info(self) -> Dict[str, str]:
@@ -47,10 +45,6 @@ class SystemProfiler:
             params.update(self._extract_windows_cpu_params())
         else:
             params.update(self._extract_linux_cpu_params())
-        
-        # Use VTune to get more detailed microarchitecture info
-        vtune_params = self._extract_vtune_params()
-        params.update(vtune_params)
         
         # Map to our parameter space (round to nearest valid value)
         return self._map_to_parameter_space(params)
@@ -90,49 +84,52 @@ class SystemProfiler:
         params = {}
         
         try:
-            # Try /proc/cpuinfo
-            with open('/proc/cpuinfo', 'r') as f:
-                cpuinfo = f.read()
-                
-                # Extract cache sizes
-                l1d_match = re.search(r'L1d cache:\s*(\d+)\s*KB', cpuinfo, re.IGNORECASE)
-                if l1d_match:
-                    params['l1_cache_size'] = int(l1d_match.group(1))
-                
-                l2_match = re.search(r'L2 cache:\s*(\d+)\s*KB', cpuinfo, re.IGNORECASE)
-                if l2_match:
-                    params['l2_cache_size'] = int(l2_match.group(1))
-                
-                # Try to get issue width (usually 4-8 for modern CPUs)
-                if 'sse' in cpuinfo.lower() or 'avx' in cpuinfo.lower():
-                    params['issue_width'] = 4  # Default for modern CPUs
+            # Prefer sysfs cache info (most reliable on Linux)
+            # Example path: /sys/devices/system/cpu/cpu0/cache/index*/{level,type,size}
+            cache_root = Path("/sys/devices/system/cpu/cpu0/cache")
+            if cache_root.exists():
+                for idx_dir in sorted(cache_root.glob("index*")):
+                    try:
+                        level = (idx_dir / "level").read_text().strip()
+                        ctype = (idx_dir / "type").read_text().strip().lower()
+                        size_s = (idx_dir / "size").read_text().strip().upper()  # e.g. "32K", "1M"
+                        m = re.match(r"^\s*(\d+)\s*([KM])\s*$", size_s)
+                        if not m:
+                            continue
+                        val = int(m.group(1))
+                        unit = m.group(2)
+                        size_kb = val * (1024 if unit == "M" else 1)
+
+                        if level == "1" and ctype in {"data", "unified"}:
+                            # L1 data cache in KB
+                            params["l1_cache_size"] = size_kb
+                        elif level == "2" and ctype in {"unified", "data"}:
+                            params["l2_cache_size"] = size_kb
+                        elif level == "3" and ctype in {"unified", "data"}:
+                            params["l3_cache_size"] = size_kb
+                    except Exception:
+                        continue
+
+            # Fallback: /proc/cpuinfo for feature flags (used only for a weak heuristic)
+            try:
+                cpuinfo = Path("/proc/cpuinfo").read_text().lower()
+                if "avx512" in cpuinfo:
+                    params["simd_width"] = 512
+                elif "avx2" in cpuinfo or "avx" in cpuinfo:
+                    params["simd_width"] = 256
+                elif "sse" in cpuinfo:
+                    params["simd_width"] = 128
+
+                # Issue width is not directly extractable; keep a conservative heuristic.
+                if "avx" in cpuinfo or "sse" in cpuinfo:
+                    params["issue_width"] = 4
+            except Exception:
+                pass
         except Exception as e:
             print(f"Warning: Could not extract Linux CPU params: {e}")
         
         return params
     
-    def _extract_vtune_params(self) -> Dict[str, int]:
-        """Extract parameters using VTune microarchitecture analysis."""
-        params = {}
-        
-        # Create a simple benchmark to profile
-        benchmark_code = '''
-import time
-# Simple CPU-bound workload
-n = 1000
-result = sum(i * i for i in range(n))
-time.sleep(0.1)
-'''
-        
-        try:
-            # Try to run VTune microarchitecture analysis
-            # This is a simplified version - full implementation would parse VTune output
-            # For now, we'll use reasonable defaults based on common CPU architectures
-            pass
-        except Exception as e:
-            print(f"Warning: Could not extract VTune params: {e}")
-        
-        return params
     
     def _map_to_parameter_space(self, params: Dict[str, int]) -> Dict[str, int]:
         """
@@ -142,142 +139,96 @@ time.sleep(0.1)
         """
         from .mab_autotuner import TUNABLE_PARAMETERS
         
-        mapped = {}
+        # If nothing was extracted, don't fabricate a full set of parameters.
+        # Callers should treat {} as "unknown actual parameters".
+        if not params:
+            return {}
+
+        mapped: Dict[str, int] = {}
         
         # Helper function to find nearest value
         def find_nearest(value: int, options: list) -> int:
             return min(options, key=lambda x: abs(x - value))
         
-        # Map each parameter
+        # Map only what we can actually infer (avoid defaulting everything).
         if 'rob_size' in params:
             mapped['rob_size'] = find_nearest(params['rob_size'], TUNABLE_PARAMETERS['rob_size'])
-        else:
-            # Default: modern CPUs typically have 128-256 ROB
-            mapped['rob_size'] = 128
-        
+
         if 'l1_cache_size' in params:
             mapped['l1_cache_size'] = find_nearest(params['l1_cache_size'], TUNABLE_PARAMETERS['l1_cache_size'])
-        else:
-            mapped['l1_cache_size'] = 64  # Default
-        
+
         if 'l2_cache_size' in params:
             mapped['l2_cache_size'] = find_nearest(params['l2_cache_size'], TUNABLE_PARAMETERS['l2_cache_size'])
-        else:
-            mapped['l2_cache_size'] = 256  # Default
-        
+
         if 'issue_width' in params:
             mapped['issue_width'] = find_nearest(params['issue_width'], TUNABLE_PARAMETERS['issue_width'])
-        else:
-            mapped['issue_width'] = 4  # Default
-        
-        # Latencies are harder to extract, use defaults
-        mapped['l1_latency'] = 3  # Typical L1 latency
-        mapped['l2_latency'] = 12  # Typical L2 latency
-        
-        # Map new parameters (with defaults if not found)
+
+        # Latencies/bandwidth/etc. are not reliably extractable here; skip unless provided.
+        if 'l1_latency' in params:
+            mapped['l1_latency'] = find_nearest(params['l1_latency'], TUNABLE_PARAMETERS['l1_latency'])
+        if 'l2_latency' in params:
+            mapped['l2_latency'] = find_nearest(params['l2_latency'], TUNABLE_PARAMETERS['l2_latency'])
+
         if 'l3_cache_size' in params:
             mapped['l3_cache_size'] = find_nearest(params['l3_cache_size'], TUNABLE_PARAMETERS['l3_cache_size'])
-        else:
-            mapped['l3_cache_size'] = 2048  # Default L3 cache size
         
         if 'l3_latency' in params:
             mapped['l3_latency'] = find_nearest(params['l3_latency'], TUNABLE_PARAMETERS['l3_latency'])
-        else:
-            mapped['l3_latency'] = 40  # Default L3 latency
         
         if 'memory_latency' in params:
             mapped['memory_latency'] = find_nearest(params['memory_latency'], TUNABLE_PARAMETERS['memory_latency'])
-        else:
-            mapped['memory_latency'] = 200  # Default memory latency
         
         if 'memory_bandwidth' in params:
             mapped['memory_bandwidth'] = find_nearest(params['memory_bandwidth'], TUNABLE_PARAMETERS['memory_bandwidth'])
-        else:
-            mapped['memory_bandwidth'] = 25  # Default memory bandwidth
         
         if 'branch_predictor_size' in params:
             mapped['branch_predictor_size'] = find_nearest(params['branch_predictor_size'], TUNABLE_PARAMETERS['branch_predictor_size'])
-        else:
-            mapped['branch_predictor_size'] = 4096  # Default branch predictor size
         
         if 'tlb_size' in params:
             mapped['tlb_size'] = find_nearest(params['tlb_size'], TUNABLE_PARAMETERS['tlb_size'])
-        else:
-            mapped['tlb_size'] = 512  # Default TLB size
         
         if 'execution_units' in params:
             mapped['execution_units'] = find_nearest(params['execution_units'], TUNABLE_PARAMETERS['execution_units'])
-        else:
-            mapped['execution_units'] = 4  # Default execution units
         
         if 'simd_width' in params:
             mapped['simd_width'] = find_nearest(params['simd_width'], TUNABLE_PARAMETERS['simd_width'])
-        else:
-            mapped['simd_width'] = 256  # Default SIMD width (AVX2)
         
         if 'prefetcher_lines' in params:
             mapped['prefetcher_lines'] = find_nearest(params['prefetcher_lines'], TUNABLE_PARAMETERS['prefetcher_lines'])
-        else:
-            mapped['prefetcher_lines'] = 16  # Default prefetcher lines
         
         if 'smt_threads' in params:
             mapped['smt_threads'] = find_nearest(params['smt_threads'], TUNABLE_PARAMETERS['smt_threads'])
-        else:
-            mapped['smt_threads'] = 2  # Default SMT threads
         
         return mapped
     
     def get_actual_parameters(self) -> Dict[str, int]:
         """
-        Get actual CPU parameters, using system defaults if extraction fails.
+        Get actual CPU parameters.
+        
+        IMPORTANT: This function will NOT fabricate or fall back to "typical"
+        CPU parameters if extraction fails. If parameters cannot be extracted,
+        it returns an empty dictionary so callers can explicitly detect the
+        missing information and avoid reporting fake values.
         
         Returns:
-            Dictionary of actual CPU parameters mapped to our parameter space
+            Dictionary of actual CPU parameters mapped to our parameter space.
+            If extraction fails, returns {}.
         """
         try:
             params = self.extract_cpu_parameters()
+            # extract_cpu_parameters() already maps into our discrete parameter
+            # space and may use reasonable defaults for *missing fields* when
+            # some information is available. However, if it ever returns an
+            # empty dict, treat that as a complete extraction failure and
+            # propagate an empty result instead of fabricating a full config.
             if not params:
-                # Fall back to reasonable defaults for a modern CPU
-                params = {
-                    'rob_size': 128,
-                    'l1_cache_size': 64,
-                    'l2_cache_size': 256,
-                    'issue_width': 4,
-                    'l1_latency': 3,
-                    'l2_latency': 12,
-                    'l3_cache_size': 2048,
-                    'l3_latency': 40,
-                    'memory_latency': 200,
-                    'memory_bandwidth': 25,
-                    'branch_predictor_size': 4096,
-                    'tlb_size': 512,
-                    'execution_units': 4,
-                    'simd_width': 256,
-                    'prefetcher_lines': 16,
-                    'smt_threads': 2
-                }
+                print("Warning: Could not extract any CPU parameters; returning empty actual_parameters.")
+                return {}
             return params
         except Exception as e:
             print(f"Warning: Could not extract actual parameters: {e}")
-            print("Using default parameters for modern CPU")
-            return {
-                'rob_size': 128,
-                'l1_cache_size': 64,
-                'l2_cache_size': 256,
-                'issue_width': 4,
-                'l1_latency': 3,
-                'l2_latency': 12,
-                'l3_cache_size': 2048,
-                'l3_latency': 40,
-                'memory_latency': 200,
-                'memory_bandwidth': 25,
-                'branch_predictor_size': 4096,
-                'tlb_size': 512,
-                'execution_units': 4,
-                'simd_width': 256,
-                'prefetcher_lines': 16,
-                'smt_threads': 2
-            }
+            print("Returning empty actual_parameters; no fallback defaults will be used.")
+            return {}
     
     def save_actual_parameters(self, output_file: Path):
         """Save actual parameters to JSON file."""

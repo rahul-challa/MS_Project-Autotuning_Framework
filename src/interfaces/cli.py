@@ -15,12 +15,11 @@ if str(src_path) not in sys.path:
 from autotuner.mab_autotuner import create_convergence_plot
 from autotuner.sequential_tuner import run_sequential_autotuning
 from autotuner.benchmark_runner import BenchmarkRunner
-from autotuner.workload_registry import get_all_workloads
 
 
 def main():
     parser = argparse.ArgumentParser(
-        description='Autotuning Framework for CPU Model Validation using Intel VTune Profiler',
+        description='Autotuning Framework for CPU Model Validation using MacSim CPU Simulator',
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
@@ -30,7 +29,7 @@ Examples:
   # Run with custom settings
   python main.py --rounds 3 --iterations-per-param 3000
 
-  # Collect ground truth using VTune
+  # Collect ground truth using MacSim
   python main.py collect-ground-truth
 
   # Collect ground truth for specific workloads
@@ -71,7 +70,7 @@ Examples:
     
     # Collect ground truth command
     collect_parser = subparsers.add_parser('collect-ground-truth', 
-                                          help='Collect ground truth using VTune')
+                                          help='Collect ground truth using MacSim')
     collect_parser.add_argument(
         '--workloads',
         nargs='+',
@@ -79,16 +78,10 @@ Examples:
         help='Workload IDs to profile (default: all workloads)'
     )
     collect_parser.add_argument(
-        '--all-collection-types',
-        action='store_true',
-        default=True,
-        help='Use all VTune collection types for comprehensive metrics'
-    )
-    collect_parser.add_argument(
         '--output',
         type=str,
         default=None,
-        help='Output file for ground truth JSON (default: data/results/vtune_ground_truth.json)'
+        help='Output file for ground truth JSON (default: data/results/ground_truth.json)'
     )
     
     args = parser.parse_args()
@@ -163,95 +156,9 @@ Examples:
         
         print(f"\nResults saved to: {results_file}")
         print(f"Convergence plot saved to: {plot_path}")
-        
-    elif args.command == 'autotune':
-        print("=" * 70)
-        print("Autotuning Framework - CPU Parameter Prediction")
-        print("=" * 70)
-        print("Predicting CPU parameters using ONLY performance metrics")
-        print("(Actual parameters used only for validation at the end)")
-        print()
-        
-        # Run maximized autotuning (uses ONLY performance metrics)
-        # Note: Actual parameters are NOT used during optimization, only for validation
-        best_config, best_error, error_history, best_iteration, actual_params, match_history, search_info = run_maximized_autotuning(
-            max_iterations=args.iterations,
-            use_multi_metric=True
-        )
-        
-        # Create visualization
-        if args.output:
-            output_dir = Path(args.output)
-        else:
-            output_dir = Path(__file__).parent.parent.parent / 'data' / 'results'
-        output_dir.mkdir(parents=True, exist_ok=True)
-        
-        plot_path = output_dir / 'autotuning_convergence.png'
-        create_convergence_plot(error_history, best_error, best_config, str(plot_path))
-        
-        # Save results
-        results_file = output_dir / 'autotuning_results.json'
-        import json
-        with open(results_file, 'w') as f:
-            json.dump({
-                'best_config': best_config,
-                'actual_parameters': actual_params,
-                'best_error': best_error,
-                'best_iteration': best_iteration,
-                'error_history': error_history,
-                'match_history': match_history,
-                'iterations': len(error_history),
-                'use_multi_metric': True,
-                'max_matches': max(match_history) if match_history else 0,
-                'final_matches': match_history[-1] if match_history else 0,
-                'search_space_info': {
-                    'total_configs': int(search_info['total_configs']),
-                    'unique_configs_tested': int(search_info['unique_configs_tested']),
-                    'coverage_percent': float(search_info['coverage_percent']),
-                    'iterations': int(search_info['iterations'])
-                },
-                'note': 'Parameters predicted using ONLY performance metrics. Actual parameters used only for validation.'
-            }, f, indent=2)
-        
-        # Calculate match percentage
-        matches = sum(1 for k in actual_params.keys() 
-                     if best_config.get(k) == actual_params.get(k))
-        match_pct = matches / len(actual_params) * 100
-        
-        print()
-        print("=" * 70)
-        print("Results Summary")
-        print("=" * 70)
-        print(f"Best configuration: {best_config}")
-        print(f"Actual parameters: {actual_params}")
-        print(f"Best found at iteration: {best_iteration}")
-        print(f"Minimum performance error: {best_error:.9f}")
-        print(f"Parameter matches (validation): {matches}/{len(actual_params)} ({match_pct:.1f}%)")
-        print(f"Total iterations: {len(error_history)}")
-        print(f"\nSearch Space Coverage:")
-        print(f"  Total possible configurations: {search_info['total_configs']:,}")
-        print(f"  Unique configurations tested: {search_info['unique_configs_tested']:,}")
-        print(f"  Coverage: {search_info['coverage_percent']:.2f}% of search space")
-        print(f"  Configurations per iteration: {search_info['unique_configs_tested']/len(error_history):.2f}")
-        print(f"\nConvergence plot: {plot_path}")
-        print(f"Results JSON: {results_file}")
-        
-        # Print parameter comparison
-        print()
-        print("Parameter Comparison:")
-        print("-" * 70)
-        print(f"{'Parameter':<20} {'Best Config':<15} {'Actual':<15} {'Match':<10}")
-        print("-" * 70)
-        for param in ['rob_size', 'l1_cache_size', 'l2_cache_size', 'issue_width', 'l1_latency', 'l2_latency']:
-            best_val = best_config[param]
-            actual_val = actual_params[param]
-            match = "YES" if best_val == actual_val else "NO"
-            print(f"{param:<20} {best_val:<15} {actual_val:<15} {match:<10}")
-        print("-" * 70)
-        
     elif args.command == 'collect-ground-truth':
         print("=" * 70)
-        print("Collecting Ground Truth using Intel VTune Profiler")
+        print("Collecting Ground Truth using MacSim CPU Simulator")
         print("=" * 70)
         print()
         
@@ -259,7 +166,7 @@ Examples:
         
         # Use ALL workloads if not specified
         if args.workloads is None:
-            print(f"Using ALL workloads from registry (will collect for all {len(get_all_workloads())} workloads)")
+            print("Using ALL workloads from registry")
         else:
             print(f"Using specified {len(args.workloads)} workloads")
         
@@ -270,8 +177,7 @@ Examples:
         
         ground_truth = benchmark_runner.collect_ground_truth(
             workload_ids=args.workloads,  # None = use ALL workloads
-            output_file=output_file,
-            use_all_collection_types=args.all_collection_types  # Use ALL collection types
+            output_file=output_file
         )
         
         print()

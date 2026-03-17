@@ -1,8 +1,8 @@
 """
-Autotuning Framework for CPU Model Validation using Intel VTune Profiler
+Autotuning Framework for CPU Model Validation using MacSim CPU Simulator
 
 This package provides a Multi-Armed Bandit (MAB) based autotuning framework
-that uses Intel VTune Profiler to collect ground truth performance metrics
+that uses MacSim CPU simulator to collect ground truth performance metrics
 and tunes CPU microarchitecture parameters to minimize prediction error.
 """
 
@@ -14,7 +14,7 @@ from .mab_autotuner import (
     TUNABLE_PARAMETERS,
     create_convergence_plot
 )
-from .vtune_profiler import VTuneProfiler
+from .macsim_profiler import MacSimProfiler
 from .benchmark_runner import BenchmarkRunner
 from .performance_model import PerformanceModel
 from .system_profiler import SystemProfiler
@@ -34,7 +34,7 @@ __all__ = [
     'MaximizedUCB1Bandit',
     'TUNABLE_PARAMETERS',
     'create_convergence_plot',
-    'VTuneProfiler',
+    'MacSimProfiler',
     'BenchmarkRunner',
     'PerformanceModel',
     'SystemProfiler',

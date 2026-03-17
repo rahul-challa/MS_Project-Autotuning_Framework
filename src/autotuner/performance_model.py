@@ -5,7 +5,7 @@ Performance Model Module
 Since we cannot change CPU microarchitecture parameters on real hardware,
 this module provides a performance model that estimates execution time
 based on CPU configuration parameters. The model parameters are tuned
-to match VTune-measured ground truth.
+to match MacSim-measured ground truth.
 """
 
 import numpy as np

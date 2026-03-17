@@ -2,16 +2,16 @@
 """
 Multi-Armed Bandit (MAB) Autotuning Framework for CPU Model Validation
 
-This framework uses Intel VTune Profiler to collect ground truth performance
-metrics from real CPU execution. Since we cannot change CPU microarchitecture
-parameters on real hardware, we use a performance model to estimate execution
-time based on CPU configuration parameters.
+This framework uses MacSim CPU simulator to collect ground truth performance
+metrics from simulated CPU execution. MacSim allows us to configure CPU
+microarchitecture parameters and simulate execution, providing ground truth
+for the autotuning framework.
 
 Project Requirements:
 - Objective: Find parameter assignment AP that minimizes EAggW,AP
 - Error Metric: EAggW,AP = sqrt(Σ(Ewi,AP)²) where Ewi,AP = |Cwi - Swi,AP|
 - MAB Algorithm: UCB1 for exploration-exploitation balance
-- Profiler: Intel VTune Profiler
+- Profiler: MacSim CPU Simulator
 """
 
 import numpy as np
@@ -25,7 +25,7 @@ from typing import Dict, List, Tuple, Optional
 from .performance_model import PerformanceModel
 from .enhanced_performance_model import EnhancedPerformanceModel
 from .benchmark_runner import BenchmarkRunner
-from .vtune_profiler import VTuneProfiler
+from .macsim_profiler import MacSimProfiler
 from .system_profiler import SystemProfiler
 from .parameter_matching_optimizer import (
     calculate_combined_error,
@@ -83,9 +83,9 @@ DEFAULT_WORKLOADS = [
 
 def load_ground_truth() -> Dict[str, Dict[str, float]]:
     """
-    Load comprehensive ground truth metrics from VTune measurements.
+    Load comprehensive ground truth metrics from MacSim measurements.
     
-    If ground truth doesn't exist, collects it for ALL workloads using ALL collection types.
+    If ground truth doesn't exist, collects it for ALL workloads using MacSim.
     
     Returns:
         Dictionary mapping workload_id to metrics dictionary
@@ -111,15 +111,14 @@ def load_ground_truth() -> Dict[str, Dict[str, float]]:
     
     # If ground truth doesn't exist, collect it for ALL workloads
     print(f"Ground truth not found at {GROUND_TRUTH_FILE}")
-    print("Collecting comprehensive ground truth for ALL workloads using ALL VTune collection types...")
+    print("Collecting comprehensive ground truth for ALL workloads using MacSim...")
     from .workload_registry import get_all_workloads
     benchmark_runner = BenchmarkRunner()
     all_workloads = get_all_workloads()
     print(f"Using ALL {len(all_workloads)} workloads")
     ground_truth = benchmark_runner.collect_ground_truth(
         workload_ids=None,  # None = use ALL workloads
-        output_file=GROUND_TRUTH_FILE,
-        use_all_collection_types=True  # Use ALL collection types
+        output_file=GROUND_TRUTH_FILE
     )
     
     # Remove metadata for return
@@ -444,7 +443,7 @@ def run_autotuning(
     tunable_params: Optional[Dict[str, List[int]]] = None
 ) -> Tuple[Dict[str, int], float, List[float]]:
     """
-    Run autotuning using MAB (UCB1) algorithm with VTune-based ground truth.
+    Run autotuning using MAB (UCB1) algorithm with MacSim-based ground truth.
     
     Args:
         max_iterations: Maximum number of iterations
@@ -496,7 +495,7 @@ def run_autotuning(
     print("Starting autotuning")
     print(f"Objective: minimize EAggW,AP = sqrt(sum(|Cwi - Swi,AP|^2))")
     print(f"Iterations: {max_iterations}")
-    print(f"Using VTune-based ground truth and performance model")
+    print(f"Using MacSim-based ground truth and performance model")
     
     for iteration in range(max_iterations):
         # 1. Select configuration (arm) using UCB1
@@ -771,18 +770,31 @@ def run_maximized_autotuning(
     print("=" * 70)
     system_profiler = SystemProfiler()
     actual_params = system_profiler.get_actual_parameters()
-    print(f"Actual CPU parameters: {actual_params}")
     
-    # Calculate matches for validation
-    matches = sum(1 for k in actual_params.keys() 
-                 if best_config.get(k) == actual_params.get(k))
-    match_pct = matches / len(actual_params) * 100
-    
-    # Generate match history (for compatibility, but only meaningful at the end)
-    match_history = [0] * (len(error_history) - 1) + [matches]
-    
-    print(f"\nPredicted parameters: {best_config}")
-    print(f"Parameter matches: {matches}/{len(actual_params)} ({match_pct:.1f}%)")
+    if not actual_params:
+        print("Warning: Actual CPU parameters could not be extracted. "
+              "Match statistics will be omitted and actual_parameters will be blank.")
+        matches = 0
+        match_pct = 0.0
+        # No meaningful match history without actual parameters; keep zeros.
+        match_history = [0] * len(error_history)
+        print(f"\nPredicted parameters: {best_config}")
+        print("Parameter matches: unavailable (no actual CPU parameters).")
+    else:
+        print(f"Actual CPU parameters: {actual_params}")
+        
+        # Calculate matches for validation
+        matches = sum(
+            1 for k in actual_params.keys()
+            if best_config.get(k) == actual_params.get(k)
+        )
+        match_pct = matches / len(actual_params) * 100
+        
+        # Generate match history (for compatibility, but only meaningful at the end)
+        match_history = [0] * (len(error_history) - 1) + [matches]
+        
+        print(f"\nPredicted parameters: {best_config}")
+        print(f"Parameter matches: {matches}/{len(actual_params)} ({match_pct:.1f}%)")
     
     # Add search space info to return (for analysis)
     search_info = {
@@ -825,7 +837,7 @@ def create_convergence_plot(
                  fontsize=9, color='red')
     ax1.set_xlabel('Iteration', fontsize=12)
     ax1.set_ylabel('Aggregate Error EAggW,AP', fontsize=12)
-    ax1.set_title('MAB Autotuning Convergence (VTune-based)', fontsize=14, fontweight='bold')
+    ax1.set_title('MAB Autotuning Convergence (MacSim-based)', fontsize=14, fontweight='bold')
     ax1.legend(fontsize=10)
     ax1.grid(True, alpha=0.3)
     
